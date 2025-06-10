@@ -1,13 +1,13 @@
 import React from 'react';
 function Team() {
     return (
-        <div className='container  '>
-            <div className='row text-center fs-5'>
-                <h1 className=''>People</h1>
+        <div className='container mt-5 ' style={{width:"1100px",paddingBottom:"100px"}} >
+            <div className='text-center mb-5'> 
+                <h1 className='' style={{fontSize:"32px"}}>People</h1>
             </div>
-            <div className='row p-5 md-5  mx-auto ' style={{ lineHeight: "2", width: "900px" }}>
+            <div className='row  md-5  mx-auto ' style={{ lineHeight: "2", width: "900px" }}>
                 <div className='col-5 text-center'  >
-                    <img src='media/images/nithinKamath.jpg' className='mx-auto d-block' style={{ width: "80%", borderRadius: "100%" }} />
+                    <img src='media/images/nithinKamath.jpg' className='mx-auto d-block' style={{ width: "295px", borderRadius: "100%" }} />
                     <h4>Nithin Kamath</h4>
                     <h5 className='text-muted' style={{ fontSize: "14.4px" }}>Founder, CEO</h5>
                 </div>

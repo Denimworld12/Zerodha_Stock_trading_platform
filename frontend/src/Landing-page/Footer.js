@@ -1,17 +1,17 @@
 import React from "react";
 function Footer() {
   return (
-    <footer className="border-top" style={{backgroundColor:"#FBFBFB"}}>
-      <div className="container md-5 p-5 ">
+    <footer className="border-top " style={{backgroundColor:"#FBFBFB"}}>
+      <div className="container md-5" style={{width:"1100px "}}>
         <div className="row">
           <div className="col">
-            <img src="media/images/logo.svg" style={{ width: "50%" }} />
+            <img src="media/images/logo.svg" style={{ width:"70%"}} />
             <p>
-              {" "}
+              
               &copy; 2010 - 2025, Zerodha Broking Ltd. All rights reserved.
             </p>
           </div>
-          <div className="col">
+          <div className="col ">
             <h5>Account</h5>
             <a href="">Open demat account</a>
             <br />

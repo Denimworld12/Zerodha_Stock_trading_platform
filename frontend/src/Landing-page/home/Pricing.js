@@ -2,8 +2,8 @@ import React from 'react';
 import './pricing.css'
 function Pricing() {
     return (
-        <div className='container p-5 md-5'>
-            <div className='row ps-5'>
+        <div className='container' style={{width:"1100px",paddingBottom:"120px"}}>
+            <div className='row '>
                 <h2 className="fs-2">Unbeatable pricing</h2>
                 <div className="col-5">
 

@@ -1,8 +1,8 @@
 import React from 'react';
 function Education() {
     return (
-        <div className='container md-5 p-5'>
-            <div className='row p-5'>
+        <div className='container ' style={{width:"1100px",paddingBottom:"120px"}}>
+            <div className='row'>
                 <div className='col-5'>
                     <img src='media/images/education.svg' style={{width:"90%"}} />
                 </div>
