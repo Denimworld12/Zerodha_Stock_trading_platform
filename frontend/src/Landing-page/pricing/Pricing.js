@@ -1,13 +1,15 @@
 import React from 'react';
 import Hero from './Hero';
 import Brokrage from './Brokrage';
+import BrokrageTable from './BrokrageTable';
 function Pricing() {
     return ( 
-        <h2>
-            this is Pricing home page
+        <div>
+            
             <Hero/>
+            <BrokrageTable/>
             <Brokrage/>
-        </h2>
+        </div>
      );
 }
 
