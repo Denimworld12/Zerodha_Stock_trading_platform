@@ -15,14 +15,14 @@ function Product() {
                 Productdescription="Our ultra-fast flagship trading platform with streaming market data, advanced charts, an elegant UI, and more. Enjoy the Kite experience seamlessly on your Android and iOS devices."
                 tryDemo="Try demo "
                 learnMore="Learn more "
-                googlePlay="https://play.google.com/store/apps/details?id=com.zerodha.kite3&pli=1"
-                appStore="https://apps.apple.com/in/app/zerodha-kite-trade-invest/id1449453802"
+                googlePlay="https://play.google.com/store/apps/details?id=com.Trading-Mitra.kite3&pli=1"
+                appStore="https://apps.apple.com/in/app/Trading-Mitra-kite-trade-invest/id1449453802"
 
             />
             <RightSection
                 imgurl="media\images\console.png"
                 Productheadline="Console"
-                Productdescription="The central dashboard for your Zerodha account. Gain insights into your trades and investments with in-depth reports and visualisations."
+                Productdescription="The central dashboard for your Trading-Mitra account. Gain insights into your trades and investments with in-depth reports and visualisations."
                 tryDemo="Learn more"
 
             />
@@ -56,7 +56,7 @@ function Product() {
             <div className='container text-center' style={{width:"1100px"}}>
                 <div className='row'>
                     <p className='fs-5' style={{ paddingTop: "80px" }}>
-                        Want to know more about our technology stack? Check out the Zerodha.tech blog.
+                        Want to know more about our technology stack? Check out the Trading-Mitra.tech blog.
                     </p>
                 </div>
 

@@ -2,16 +2,12 @@
   text-decoration: none !important;
   border-bottom: 3px solid transparent;
   transition: border-bottom 0.2s;
+  cursor: pointer;
 }
 
-.bt:hover {
-  border-bottom: 3px solid #0d6efd;
-   color: rgb(58, 57, 57); /* Bootstrap primary blue */
-  /* Optional: change text color to blue on hover */
-}
+
 
 .bt.active  {
-  
   border-bottom: 3px solid #0d6efd;
   color: rgb(58, 57, 57);
   

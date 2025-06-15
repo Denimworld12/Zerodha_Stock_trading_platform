@@ -8,7 +8,7 @@ function Hero() {
             </div>
             <div className='row md-5  border-top mx-auto' style={{ lineHeight: "2" ,width:"900px" ,paddingTop:"80px"}}>
                 <div className='col ' style={{fontSize:"16px"}} >
-                    <p > We kick-started operations on the 15th of August, 2010 with the goal of breaking all barriers that traders and investors face in India in terms of cost, support, and technology. We named the company Zerodha, a combination of Zero and "Rodha", the Sanskrit word for barrier.</p>
+                    <p > We kick-started operations on the 15th of August, 2010 with the goal of breaking all barriers that traders and investors face in India in terms of cost, support, and technology. We named the company Trading-Mitra, a combination of Zero and "Rodha", the Sanskrit word for barrier.</p>
 
                     <p> Today, our disruptive pricing models and in-house technology have made us the biggest stock broker in India.</p>
 

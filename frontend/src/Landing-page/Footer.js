@@ -1,104 +1,103 @@
 import React from "react";
 function Footer() {
   return (
-    <footer className="border-top " style={{backgroundColor:"#FBFBFB"}}>
-      <div className="container md-5" style={{width:"1100px "}}>
+    <footer className="border-top " style={{ backgroundColor: "#FBFBFB", paddingTop: "50px" }}>
+      <div className="container md-5 " style={{ width: "1100px " }}>
         <div className="row">
-          <div className="col">
-            <img src="media/images/logo.svg" style={{ width:"70%"}} />
-            <p>
-              
-              &copy; 2010 - 2025, Zerodha Broking Ltd. All rights reserved.
+          <div className="col-3">
+            <img src="media/images/image.png" className="mb-3" style={{ width: "60%" }} />
+            <p style={{ marginBottom: "20px", fontSize: "12.8px" }} className="mb-3">
+              &copy; 2010 - 2025, Trading-Mitra Broking Ltd. All rights reserved.
             </p>
+
+            {/* First Row of Social Icons */}
+            <div className="d-flex gap-4 align-items-center border-bottom pb-3">
+              <a href="#"><i className="fab fa-x-twitter fa-lg text-muted"></i></a>
+              <a href="#"><i className="fab fa-facebook fa-lg text-muted"></i></a>
+              <a href="#"><i className="fab fa-instagram fa-lg text-muted"></i></a>
+              <a href="#"><i className="fab fa-linkedin fa-lg text-muted"></i></a>
+            </div>
+
+            {/* Second Row of Social Icons */}
+            <div className="d-flex gap-4 align-items-center mt-3">
+              <a href="#"><i className="fab fa-youtube fa-lg text-muted"></i></a>
+              <a href="#"><i className="fab fa-whatsapp fa-lg text-muted"></i></a>
+              <a href="#"><i className="fab fa-telegram fa-lg text-muted"></i></a>
+            </div>
           </div>
-          <div className="col ">
-            <h5>Account</h5>
-            <a href="">Open demat account</a>
-            <br />
-            <a href="">Minor demat account</a>
-            <br />
-            <a href="">NRI demat account</a>
-            <br />
-            <a href="">Commodity </a>
-            <br />
-            <a href="">Dematerialisation</a>
-            <br />
-            <a href="">Fund</a>
-            <br />
-            <a href="">transfer</a>
-            <br />
-            <a href="">MTF</a>
-            <br />
-            <a href="">Referral</a>
-            <br />
-            <a href="">program</a>
-            <br />
+
+          <div className="col-9" style={{ display: "flex", flexWrap: "wrap", flexDirection: "row", }}>
+            <div className="col" style={{ margin: "auto" }}>
+              <h5 style={{ marginBottom: "20px", fontSize: "18px" }}>Account</h5>
+              <ul className="list-unstyled">
+                <li><a href="#" className="text-muted text-decoration-none d-block mb-2" style={{ fontSize: "14px" }}>Open demat account</a></li>
+                <li><a href="#" className="text-muted text-decoration-none d-block mb-2" style={{ fontSize: "14px" }}>Minor demat account</a></li>
+                <li><a href="#" className="text-muted text-decoration-none d-block mb-2" style={{ fontSize: "14px" }}>NRI demat account</a></li>
+                <li><a href="#" className="text-muted text-decoration-none d-block mb-2" style={{ fontSize: "14px" }}>Commodity</a></li>
+                <li><a href="#" className="text-muted text-decoration-none d-block mb-2" style={{ fontSize: "14px" }}>Dematerialisation</a></li>
+                <li><a href="#" className="text-muted text-decoration-none d-block mb-2" style={{ fontSize: "14px" }}>Fund</a></li>
+                <li><a href="#" className="text-muted text-decoration-none d-block mb-2" style={{ fontSize: "14px" }}>Transfer</a></li>
+                <li><a href="#" className="text-muted text-decoration-none d-block mb-2" style={{ fontSize: "14px" }}>MTF</a></li>
+                <li><a href="#" className="text-muted text-decoration-none d-block mb-2" style={{ fontSize: "14px" }}>Referral Program</a></li>
+              </ul>
+            </div>
+
+            <div className="col">
+              <h5 style={{ marginBottom: "20px", fontSize: "18px" }}>Support</h5>
+              <ul className="list-unstyled">
+                <li><a href="#" className="text-muted text-decoration-none d-block mb-2" style={{ fontSize: "14px" }}>Contact us</a></li>
+                <li><a href="#" className="text-muted text-decoration-none d-block mb-2" style={{ fontSize: "14px" }}>Support portal</a></li>
+                <li><a href="#" className="text-muted text-decoration-none d-block mb-2" style={{ fontSize: "14px" }}>How to file a complaint?</a></li>
+                <li><a href="#" className="text-muted text-decoration-none d-block mb-2" style={{ fontSize: "14px" }}>Status of your complaints</a></li>
+                <li><a href="#" className="text-muted text-decoration-none d-block mb-2" style={{ fontSize: "14px" }}>Bulletin</a></li>
+                <li><a href="#" className="text-muted text-decoration-none d-block mb-2" style={{ fontSize: "14px" }}>Circular</a></li>
+                <li><a href="#" className="text-muted text-decoration-none d-block mb-2" style={{ fontSize: "14px" }}>Z-Connect blog</a></li>
+                <li><a href="#" className="text-muted text-decoration-none d-block mb-2" style={{ fontSize: "14px" }}>Downloads</a></li>
+              </ul>
+            </div>
+
+            <div className="col">
+              <h5 style={{ marginBottom: "20px", fontSize: "18px" }}>Company</h5>
+              <ul className="list-unstyled">
+                <li><a href="#" className="text-muted text-decoration-none d-block mb-2" style={{ fontSize: "14px" }}>About</a></li>
+                <li><a href="#" className="text-muted text-decoration-none d-block mb-2" style={{ fontSize: "14px" }}>Philosophy</a></li>
+                <li><a href="#" className="text-muted text-decoration-none d-block mb-2" style={{ fontSize: "14px" }}>Press & media</a></li>
+                <li><a href="#" className="text-muted text-decoration-none d-block mb-2" style={{ fontSize: "14px" }}>Careers</a></li>
+                <li><a href="#" className="text-muted text-decoration-none d-block mb-2" style={{ fontSize: "14px" }}>Trading-Mitra Cares (CSR)</a></li>
+                <li><a href="#" className="text-muted text-decoration-none d-block mb-2" style={{ fontSize: "14px" }}>Trading-Mitra.tech</a></li>
+                <li><a href="#" className="text-muted text-decoration-none d-block mb-2" style={{ fontSize: "14px" }}>Open source</a></li>
+              </ul>
+            </div>
+
+            <div className="col">
+              <h5 style={{ marginBottom: "20px", fontSize: "18px" }}>Quick links</h5>
+              <ul className="list-unstyled">
+                <li><a href="#" className="text-muted text-decoration-none d-block mb-2" style={{ fontSize: "14px" }}>Upcoming IPOs</a></li>
+                <li><a href="#" className="text-muted text-decoration-none d-block mb-2" style={{ fontSize: "14px" }}>Brokerage charges</a></li>
+                <li><a href="#" className="text-muted text-decoration-none d-block mb-2" style={{ fontSize: "14px" }}>Market holidays</a></li>
+                <li><a href="#" className="text-muted text-decoration-none d-block mb-2" style={{ fontSize: "14px" }}>Economic calendar</a></li>
+                <li><a href="#" className="text-muted text-decoration-none d-block mb-2" style={{ fontSize: "14px" }}>Calculators</a></li>
+                <li><a href="#" className="text-muted text-decoration-none d-block mb-2" style={{ fontSize: "14px" }}>Markets</a></li>
+                <li><a href="#" className="text-muted text-decoration-none d-block mb-2" style={{ fontSize: "14px" }}>Sectors</a></li>
+              </ul>
+            </div>
           </div>
-          <div className="col">
-            <h5>Support</h5>
-            <a href="#">Contact us</a>
-            <br />
-            <a href="#">Support portal</a>
-            <br />
-            <a href="#">How to file a complaint?</a>
-            <br />
-            <a href="#">Status of your complaints</a>
-            <br />
-            <a href="#">Bulletin</a>
-            <br />
-            <a href="#">Circular</a>
-            <br />
-            <a href="#">Z-Connect blog</a>
-            <br />
-            <a href="#">Downloads</a>
-            <br />
-          </div>
-          <div className="col">
-            <h5>Company</h5>
-            <a href="#">About</a>
-            <br />
-            <a href="#">Philosophy</a>
-            <br />
-            <a href="#">Press & media</a>
-            <br />
-            <a href="#">Careers</a>
-            <br />
-            <a href="#">Zerodha Cares (CSR)</a>
-            <br />
-            <a href="#">Zerodha.tech</a>
-            <br />
-            <a href="#">Open source</a>
-            <br />
-          </div>
-          <div className="col">
-            <h5>Quick links</h5>
-            <a href="#">Upcoming IPOs</a>
-            <br />
-            <a href="#">Brokerage charges</a>
-            <br />
-            <a href="#">Market holidays</a>
-            <br />
-            <a href="#">Economic calendar</a>
-            <br />
-            <a href="#">Calculators</a>
-            <br />
-            <a href="#">Markets</a>
-            <br />
-            <a href="#">Sectors</a>
-            <br />
-          </div>
+
+
         </div>
-        <div className="md-5 mt-5 text-muted" style={{ fontSize: "12px" }}>
+        <div className="md-5 mt-5 text-muted" style={{ fontSize: "10px", color: "#9B9B9B", lineHeight: "1.8" }}>
           <p>
-            Zerodha Broking Ltd.: Member of NSE, BSE​ &​ MCX – SEBI Registration
-            no.: INZ000031633 CDSL/NSDL: Depository services through Zerodha
+            Trading-Mitra Broking Ltd.: Member of NSE, BSE​ &​ MCX – SEBI Registration
+            no.: INZ000031633 CDSL/NSDL: Depository services through Trading-Mitra
             Broking Ltd. – SEBI Registration no.: IN-DP-431-2019 Commodity
-            Trading through Zerodha Commodities Pvt. Ltd. MCX: 46025; NSE-50001
-            – SEBI Registration no.: INZ000038238 Registered Address: Zerodha
+            Trading through Trading-Mitra Commodities Pvt. Ltd. MCX: 46025; NSE-50001
+            – SEBI Registration no.: INZ000038238 Registered Address: Trading-Mitra
             Broking Ltd., #153/154, 4th Cross, Dollars Colony, Opp. Clarence
             Public School, J.P Nagar 4th Phase, Bengaluru - 560078, Karnataka,
             India. For any complaints pertaining to securities broking please
-            write to complaints@zerodha.com, for DP related to dp@zerodha.com.
+            write to <a className="text-decoration-none" href="">complaints@Trading-Mitra.com
+            </a>, for DP related to <a className="text-decoration-none" href="">dp@Trading-Mitra.com
+            </a>.
             Please ensure you carefully read the Risk Disclosure Document as
             prescribed by SEBI | ICF{" "}
           </p>
@@ -109,7 +108,9 @@ function Footer() {
             Communication, Speedy redressal of the grievances{" "}
           </p>
           <p>
-            Smart Online Dispute Resolution | Grievances Redressal Mechanism{" "}
+            <a className="text-decoration-none" href="">Smart Online Dispute Resolution
+            </a>  | <a className="text-decoration-none" href="">Grievances Redressal Mechanism{" "}
+            </a>
           </p>
           <p>
             Investments in securities market are subject to market risks; read
@@ -140,21 +141,25 @@ function Footer() {
             of allotment. In case of non allotment the funds will remain in your
             bank account. As a business we don't give stock tips, and have not
             authorized anyone to trade on behalf of others. If you find anyone
-            claiming to be part of Zerodha and offering such services, please
-            create a ticket here.
+            claiming to be part of Trading-Mitra and offering such services, please
+            <a className="text-decoration-none" href="">create a ticket here</a>.
           </p>
         </div>
-        <div className="m-3 text-center">
-          <a href="#">NSE</a>
-          <a href="#">BSE</a>
-          <a href="#">MCX</a>
-          <a href="#">Terms & conditions</a>
-          <a href="#">Policies & procedures</a>
-          <a href="#">Privacy policy</a>
-          <a href="#">Disclosure</a>
-          <a href="#">For investor's attention</a>
-          <a href="#">Investor charter</a>
+        <div
+          className="m-3 text-center"
+          style={{ fontSize: "12px", whiteSpace: "nowrap", marginLeft: "-20px", fontWeight: "600" }}
+        >
+          <a href="#" className="me-3 text-decoration-none text-muted">NSE</a>
+          <a href="#" className="me-3 text-decoration-none text-muted">BSE</a>
+          <a href="#" className="me-3 text-decoration-none text-muted">MCX</a>
+          <a href="#" className="me-3 text-decoration-none text-muted">Terms & conditions</a>
+          <a href="#" className="me-3 text-decoration-none text-muted">Policies & procedures</a>
+          <a href="#" className="me-3 text-decoration-none text-muted">Privacy policy</a>
+          <a href="#" className="me-3 text-decoration-none text-muted">Disclosure</a>
+          <a href="#" className="me-3 text-decoration-none text-muted">For investor's attention</a>
+          <a href="#" className="text-decoration-none text-muted">Investor charter</a>
         </div>
+
       </div>
     </footer>
   );

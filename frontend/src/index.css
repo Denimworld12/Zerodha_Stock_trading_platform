@@ -29,4 +29,7 @@ code {
 .nav-link{
   margin-left: 40px;
 }
+.text-muted{
+  color: #827e7e !important;
 
+}

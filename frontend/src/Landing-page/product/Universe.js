@@ -31,7 +31,7 @@ function Universe() {
     return (
         <div className='container ' style={{ width: "1100px", paddingTop: "80px", paddingBottom: "80    px" }}>
             <div className='row text-center'>
-                <h2>The Zerodha Universe</h2>
+                <h2>The Trading-Mitra Universe</h2>
                 <p className=''>Extend your trading and investment experience even further with our partner platforms</p>
                 <div className='row mt-5' >
 

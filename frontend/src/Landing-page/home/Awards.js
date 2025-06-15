@@ -7,13 +7,13 @@ function Awards() {
           <h2 className='mb-5 fs-2'>Trust with confidence</h2>
           <h3 className='fs-5 '>Customer-first always</h3>
           <p className='text-muted mb-5'>
-            That's why 1.6+ crore customers trust Zerodha with ~ ₹6 lakh crores of equity investments and contribute to 15% of daily retail exchange volumes in India.
+            That's why 1.6+ crore customers trust Trading-Mitra with ~ ₹6 lakh crores of equity investments and contribute to 15% of daily retail exchange volumes in India.
           </p>
           <h3 className='fs-5 ' >No spam or gimmicks</h3>
           <p className='text-muted mb-5'>
             No gimmicks, spam, "gamification", or annoying push notifications. High quality apps that you use at your pace, the way you like. Our philosophies.
           </p>
-          <h3 className='fs-5 '>The Zerodha universe</h3>
+          <h3 className='fs-5 '>The Trading-Mitra universe</h3>
           <p className='text-muted mb-5'>
             Not just an app, but a whole ecosystem. Our investments in 30+ fintech startups offer you tailored services specific to your needs.
           </p>
