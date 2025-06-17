@@ -34,7 +34,7 @@ const Menu = () => {
           <li>
             <Link
               style={{ textDecoration: "none" }}
-              to={'/'}
+              to={'/orders'}
               onClick={() => handleMenu(1)}>
               
               <p className={selectedMenu==1 ? activeMenu:menuClass}> Orders</p>
@@ -43,7 +43,7 @@ const Menu = () => {
           <li>
             <Link
               style={{ textDecoration: "none" }}
-              to={'/'}
+              to={'/holdings'}
               onClick={() => handleMenu(2)}>
               
               <p className={selectedMenu==2 ? activeMenu:menuClass}> Holdings</p>
@@ -52,7 +52,7 @@ const Menu = () => {
           <li>
             <Link
               style={{ textDecoration: "none" }}
-              to={'/'}
+              to={'/positions'}
               onClick={() => handleMenu(3)}>
               
               <p className={selectedMenu==3 ? activeMenu:menuClass}> Positions</p>
@@ -61,7 +61,7 @@ const Menu = () => {
           <li>
             <Link
               style={{ textDecoration: "none" }}
-              to={'/'}
+              to={'/apps'}
               onClick={() => handleMenu(4)}>
               
               <p className={selectedMenu==4 ? activeMenu:menuClass}> Bids</p>
@@ -78,7 +78,7 @@ const Menu = () => {
           </li>
         </ul>
         <hr />
-        <div className="profile" >
+        <div className="profile" onClick={handleMenu} >
 
           <div className="avatar">ZU</div>
           <p className="username">DEMOUSERID</p>

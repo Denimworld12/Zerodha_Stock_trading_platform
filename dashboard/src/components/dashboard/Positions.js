@@ -1,5 +1,5 @@
 import React from "react";
-
+import { positions } from "../../data/data";
 const Positions = () => {
   return (
     <>
@@ -16,6 +16,30 @@ const Positions = () => {
             <th>P&L</th>
             <th>Chg.</th>
           </tr>
+
+          {
+            positions.map((stock, idx) => {
+              const curValue = stock.price * stock.qty;
+              const isProfit = curValue - stock.price * stock.avg.qty >= 0.0;
+              const profitClass = isProfit ? "profit" : "loss";
+              const dayClass = stock.isLoss ? "loss" : "profit "
+              return (
+                <tr key={idx} >
+                  <td>{stock.product}</td>
+                  <td>{stock.name}</td>
+                  <td>{stock.qty}</td>
+                  <td>{stock.avg.toFixed(2)}</td>
+                  <td>{stock.price.toFixed(2)}</td>
+                  {/* <td>{curValue.toFixed(2)}</td> */}
+                  <td className={profitClass}>
+                    {(curValue - stock.avg * stock.qty).toFixed(2)}
+                  </td>
+                  {/* <td className={profitClass}>{stock.net}</td> */}
+                  <td className={dayClass}>{stock.day}</td>
+                </tr>
+              )
+            })
+          }
         </table>
       </div>
     </>
