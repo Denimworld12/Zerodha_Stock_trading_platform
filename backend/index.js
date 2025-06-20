@@ -1,15 +1,19 @@
 require('dotenv').config()
 const express = require("express")
 const mongoose = require('mongoose');
+const bodyParser = require('body-parser')
+const cors = require('cors')
+
 const app = express();
 
 const PORT = process.env.PORT || 3002;
 const url = process.env.MONGO_URL;
+const { HoldingModel } = require('./model/HoldingModel')
+const { PositionModel } = require('./model/PositionModel');
+const { OrderModel } = require('./model/OrderModel')
 
 
 
-
-const { HoldingModel } = require( './model/HoldingModel')
 // app.get('/addHolding', async (req, res) => {
 //     let tempHolding = [
 //         {
@@ -139,7 +143,6 @@ const { HoldingModel } = require( './model/HoldingModel')
 // res.send("done!!!!");
 // })
 
-const { PositionModel } = require('./model/PositionModel');
 
 // app.get("/position", (req, res) => {
 //     const tempPosition = [
@@ -180,14 +183,42 @@ const { PositionModel } = require('./model/PositionModel');
 //     })
 //     res.send("Positon is set to database")
 // })
-app.get('/holding',async (req, res)=>{
-    let allHolding= await HoldingModel.find({})
+
+
+app.use(cors())
+app.use(bodyParser.json())
+app.use(express.urlencoded({ extended: true }));
+
+
+app.get('/holding', async (req, res) => {
+    let allHolding = await HoldingModel.find({})
     res.json(allHolding)
 })
-app.get('/position',async (req, res)=>{
-    let allPosition= await PositionModel.find({})
+
+
+app.get('/position', async (req, res) => {
+    let allPosition = await PositionModel.find({})
     res.json(allPosition)
 })
+
+
+app.post('/order', async (req, res) => {
+    console.log("BODY RECEIVED:", req.body);
+    let newOrder = new OrderModel({
+        name: req.body.name,
+        qty: req.body.qty,
+        price: req.body.price,
+        mode: req.body.mode,
+    })
+    newOrder.save()
+
+    res.send("Order completed!!")
+})
+
+
+
+
+
 app.listen(PORT, () => {
     console.log('kau bhava bhai ')
     mongoose.connect(url);
