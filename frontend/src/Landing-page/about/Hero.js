@@ -1,8 +1,8 @@
 import React from 'react';
 function Hero() {
     return (
-        <div className='container mb-5 ' style={{width:"1100px"}}>
-            <div className='row mb-5 mt-5  text-center' style={{paddingBottom:"60px"}}>
+        <div className='container mb-5 ' style={{width:"1100px" ,paddingTop:"120px" }}>
+            <div className='row mb-5 text-center' style={{paddingBottom:"60px"}}>
                 <h1 className='fs-2'>We pioneered the discount broking model in India.<br />
                     Now, we are breaking ground with our technology.</h1>
             </div>

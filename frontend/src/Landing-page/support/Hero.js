@@ -1,7 +1,7 @@
 import React from 'react';
 function Hero() {
     return (
-        <div style={{ paddingTop: "20px", paddingBottom: "85px", background: "#387ED1", color: "#0000" }}>
+        <div style={{ paddingTop: "80px", paddingBottom: "85px", background: "#387ED1", color: "#0000" }}>
             <div className='container ' style={{ width: "1100px" }}>
                 <div className='row  '>
                     <div className='d-flex justify-content-between align-items-center p-0 mb-4' style={{ height: "84px", fontWeight: "500" }}>

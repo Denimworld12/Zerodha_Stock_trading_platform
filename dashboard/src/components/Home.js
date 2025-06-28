@@ -1,13 +1,15 @@
 import React from "react";
 
-import Dashboard from "./dashboard/Dashboard";
+import Dashboard from "./dashboard/HomeDashboard";
 import TopBar from "./TopBar";
-
+import { FinnhubProvider } from "./data/FinnhubContext";
 const Home = () => {
   return (
     <>
       <TopBar />
-      <Dashboard />
+      <FinnhubProvider>
+        <Dashboard />
+      </FinnhubProvider>
     </>
   );
 };

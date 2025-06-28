@@ -4,7 +4,7 @@ import './navbar.css'
 function Navbar() {
     return (
 
-        <nav className="navbar  navbar-expand-lg  border sticky-top mx-auto" style={{ backgroundColor: "white" }}>
+        <nav className="navbar  navbar-expand-lg  border fixed-top mx-auto" style={{ backgroundColor: "white" }}>
             <div className="container p-2" style={{ backgroundColor: "white", width: "1100px" }}>
                 <div className="row">
                     <div className="col-4">

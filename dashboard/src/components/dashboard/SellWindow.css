@@ -80,3 +80,43 @@
   background: #9b9b9b;
   color: #fff;
 }
+.popup-header-sell {
+  background-color: #d32f2f;
+  color: white;
+  padding: 8px 12px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: move;
+}
+
+.close-btn {
+  background: transparent;
+  color: white;
+  font-size: 18px;
+  border: none;
+  cursor: pointer;
+}
+
+.inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px;
+}
+
+fieldset {
+  border: 1px solid #ddd;
+  padding: 4px 8px;
+  flex: 1 1 40%;
+}
+
+input {
+  width: 100%;
+  border: none;
+  outline: none;
+}
+body{
+  background-color: white;
+}

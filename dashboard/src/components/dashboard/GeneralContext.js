@@ -1,22 +1,40 @@
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import BuyWindow from "./BuyWindow";
-import SellWindow from './SellWindow'
-
+import SellWindow from "./SellWindow";
 
 const GeneralContext = React.createContext({
-  openBuyWindow: (uid) => { },
-  closeBuyWindow: () => { },
-  openSellWindow: (uid) => { },
-  closeSellWindow: () => { },
+  openBuyWindow: (uid) => {},
+  closeBuyWindow: () => {},
+  openSellWindow: (uid) => {},
+  closeSellWindow: () => {},
+  positions: [],
+  refreshPositions: () => {}
 });
 
 export const GeneralContextProvider = (props) => {
   const [isBuyWindowOpen, setIsBuyWindowOpen] = useState(false);
   const [selectedStockUID, setSelectedStockUID] = useState("");
-  const [isSellWindowOpen, setSellWindowOpen] = useState(false)
-  const [SellStockUid, setSelectedSellStock] = useState("")
+  const [isSellWindowOpen, setIsSellWindowOpen] = useState(false);
+  const [selectedSellStockUID, setSelectedSellStockUID] = useState("");
+  const [positions, setPositions] = useState([]);
 
+  // Fetch latest positions from backend
+  const refreshPositions = async () => {
+    try {
+      const res = await axios.get("http://localhost:3002/position");
+      setPositions(res.data);
+    } catch (error) {
+      console.error("Error fetching positions:", error);
+    }
+  };
+
+  // Load positions on first render
+  useEffect(() => {
+    refreshPositions();
+  }, []);
+
+  // Buy handlers
   const handleOpenBuyWindow = (uid) => {
     setIsBuyWindowOpen(true);
     setSelectedStockUID(uid);
@@ -25,27 +43,31 @@ export const GeneralContextProvider = (props) => {
     setIsBuyWindowOpen(false);
     setSelectedStockUID("");
   };
-  const handleSellOpen = (uid) => {
-    setSellWindowOpen(true);
-    setSelectedSellStock(uid);
-  }
-  const handleCloseSell = () => {
-    setSellWindowOpen(false);
-    setSelectedSellStock("");
-  }
+
+  // Sell handlers
+  const handleOpenSellWindow = (uid) => {
+    setIsSellWindowOpen(true);
+    setSelectedSellStockUID(uid);
+  };
+  const handleCloseSellWindow = () => {
+    setIsSellWindowOpen(false);
+    setSelectedSellStockUID("");
+  };
 
   return (
     <GeneralContext.Provider
       value={{
         openBuyWindow: handleOpenBuyWindow,
         closeBuyWindow: handleCloseBuyWindow,
-        openSellWindow: handleSellOpen,
-        closeSellWindow: handleCloseSell,
+        openSellWindow: handleOpenSellWindow,
+        closeSellWindow: handleCloseSellWindow,
+        positions,
+        refreshPositions
       }}
     >
       {props.children}
       {isBuyWindowOpen && <BuyWindow uid={selectedStockUID} />}
-      {isSellWindowOpen && <SellWindow uid={SellStockUid} />}
+      {isSellWindowOpen && <SellWindow uid={selectedSellStockUID} />}
     </GeneralContext.Provider>
   );
 };

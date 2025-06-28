@@ -1,9 +1,9 @@
 import React from 'react';
 function Hero() {
     return (
-        <div className='container' style={{width:"1100px",paddingBottom:"120px"}} >
+        <div className='container' style={{width:"1100px",paddingBottom:"120px", paddingTop:"120px"}} >
             <div className='row text-center'>
-<img src='media/images/homeHero.png' alt='Hero Image' className='d-block mx-auto mb-5' style={{width:"60%"}} />
+<img src='media/images/homeHero.png' alt='Hero Image' className='d-block mx-auto mb-5' style={{width:"80%"}} />
                 <h1 className='mt-5 fs-1'>Invest in everything</h1>
                 <p className='fs-4'>
                     Online platform to invest in stocks, derivatives, mutual funds, ETFs, bonds, and more.

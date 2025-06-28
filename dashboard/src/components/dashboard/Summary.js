@@ -1,6 +1,51 @@
 import React from "react";
+import { LineChart } from "../chart/LineChart";
+import { useState, useEffect } from "react";
+import axios from 'axios';
 
 const Summary = () => {
+  const [allHoldings, setHolding] = useState([]);
+
+  useEffect(() => {
+    axios.get("http://localhost:3002/holding").then((res) => {
+      setHolding(res.data);
+    });
+  }, []);
+
+  // Calculate min & max price for gradient
+  const prices = allHoldings.map(stock => stock.price);
+  const minPrice = Math.min(...prices, 0); // fallback 0 if empty
+  const maxPrice = Math.max(...prices, 1); // fallback 1 if empty
+
+  function colorFromRaw(ctx) {
+    if (ctx.type !== 'data') {
+      return 'transparent';
+    }
+    const value = ctx.raw.v;
+
+    // Normalize value between 0 and 1
+    const percent = (value - minPrice) / (maxPrice - minPrice);
+    const hue = 120 - (120 * percent); // 120 (green) → 0 (red)
+
+    return `hsl(${hue}, 70%, 50%)`;
+  }
+
+  const data = {
+    datasets: [
+      {
+        tree: allHoldings.map(stock => ({
+          name: stock.name,
+          v: stock.price
+        })),
+        key: 'v',
+        groups: ['name'],
+        backgroundColor: colorFromRaw,
+        borderRadius: 4,
+        borderWidth: 1,
+        spacing: 1
+      }
+    ]
+  };
   return (
     <>
       <div className="username">
@@ -55,6 +100,7 @@ const Summary = () => {
             </p>
           </div>
         </div>
+        <LineChart data={data} />
         <hr className="divider" />
       </div>
     </>

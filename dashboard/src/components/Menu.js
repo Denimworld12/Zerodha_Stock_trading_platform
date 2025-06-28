@@ -1,87 +1,59 @@
-import React from "react";
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+// Add optional styles here
 
 const Menu = () => {
   const [selectedMenu, setMenu] = useState(0);
-  //for the select menu tag 
   const [isProfileDropdown, setProfile] = useState(false);
-  const handleMenu = (index) => (
-    setMenu(index)
-  )
-  const handleProfile = (index) => (
-    setProfile(!isProfileDropdown)
-  )
+  const navigate = useNavigate();
+
+  const isLoggedIn = !!localStorage.getItem("token");
+
+  const handleMenu = (index) => setMenu(index);
+  const toggleProfile = () => setProfile(!isProfileDropdown);
+
+  const handleLogin = () => navigate("/signup");
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/signup");
+  };
+
   const menuClass = "menu";
-  const activeMenu = "menu selected"
+  const activeMenu = "menu selected";
 
   return (
     <div className="menu-container">
-
-      <img src="media\images\logo.png" style={{ width: "40px" }} />
+      <img src="media/images/logo.png" style={{ width: "40px" }} alt="logo" />
       <div className="menus">
         <ul>
-          <li>
-            <Link
-              style={{ textDecoration: "none" }}
-              to={'/'}
-              onClick={() => handleMenu(0)}>
-              
-              <p className={selectedMenu==0 ? activeMenu:menuClass}> Dashboard</p>
-            </Link>
-
-          </li>
-          <li>
-            <Link
-              style={{ textDecoration: "none" }}
-              to={'/orders'}
-              onClick={() => handleMenu(1)}>
-              
-              <p className={selectedMenu==1 ? activeMenu:menuClass}> Orders</p>
-            </Link>
-          </li>
-          <li>
-            <Link
-              style={{ textDecoration: "none" }}
-              to={'/holdings'}
-              onClick={() => handleMenu(2)}>
-              
-              <p className={selectedMenu==2 ? activeMenu:menuClass}> Holdings</p>
-            </Link>
-          </li>
-          <li>
-            <Link
-              style={{ textDecoration: "none" }}
-              to={'/positions'}
-              onClick={() => handleMenu(3)}>
-              
-              <p className={selectedMenu==3 ? activeMenu:menuClass}> Positions</p>
-            </Link>
-          </li>
-          <li>
-            <Link
-              style={{ textDecoration: "none" }}
-              to={'/apps'}
-              onClick={() => handleMenu(4)}>
-              
-              <p className={selectedMenu==4 ? activeMenu:menuClass}> Bids</p>
-            </Link>
-          </li>
-          <li>
-           <Link
-              style={{ textDecoration: "none" }}
-              to={'/funds '}
-              onClick={() => handleMenu(5)}>
-              
-              <p className={selectedMenu==5 ? activeMenu:menuClass}> funds</p>
-            </Link>
-          </li>
+          {["Dashboard", "Orders", "Holdings", "Positions", "charts", "Funds"].map((item, idx) => (
+            <li key={idx}>
+              <Link
+                to={item === "Dashboard" ? "/" : `/${item.toLowerCase()}`}
+                onClick={() => handleMenu(idx)}
+                style={{ textDecoration: "none" }}
+              >
+                <p className={selectedMenu === idx ? activeMenu : menuClass}>{item}</p>
+              </Link>
+            </li>
+          ))}
         </ul>
-        <hr />
-        <div className="profile" onClick={handleMenu} >
 
+        <hr />
+
+        <div className="profile" onClick={toggleProfile}>
           <div className="avatar">ZU</div>
           <p className="username">DEMOUSERID</p>
+
+          {isProfileDropdown && (
+            <div className="custom-dropdown shadow-sm">
+              {isLoggedIn ? (
+                <button onClick={handleLogout} className="dropdown-btn">Logout</button>
+              ) : (
+                <button onClick={handleLogin} className="dropdown-btn">Login</button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import React, { useState,useContext } from "react";
+import React, { useState, useContext } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 
@@ -8,10 +8,12 @@ import "./BuyWindow.css";
 const BuyWindow = ({ uid }) => {
   const [stockQuantity, setStockQuantity] = useState(1);
   const [stockPrice, setStockPrice] = useState(0.0);
+  const [stopLoss, setStopLoss] = useState("");
+  const [target, setTarget] = useState("");
+
   const [position, setPosition] = useState({ x: 100, y: 100 });
   const [dragging, setDragging] = useState(false);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
-
 
   const generalContext = useContext(GeneralContext);
 
@@ -27,11 +29,11 @@ const BuyWindow = ({ uid }) => {
     if (dragging) {
       let newX = e.clientX - offset.x;
       let newY = e.clientY - offset.y;
-      // Optional: Limit popup within window bounds
+
       const windowWidth = window.innerWidth;
       const windowHeight = window.innerHeight;
-      const popupWidth = 300;  // approximate width
-      const popupHeight = 200; // approximate height
+      const popupWidth = 300;
+      const popupHeight = 250;
 
       newX = Math.max(0, Math.min(newX, windowWidth - popupWidth));
       newY = Math.max(0, Math.min(newY, windowHeight - popupHeight));
@@ -44,26 +46,26 @@ const BuyWindow = ({ uid }) => {
     setDragging(false);
   };
 
-  const handleBuyClick = () => {
-    axios.post("http://localhost:3002/order", {
-      name: uid,
-      qty: stockQuantity,
-      price: stockPrice,
-      mode: "BUY",
-    });
-    if (generalContext?.closeBuyWindow) {
-      generalContext.closeBuyWindow();
-    } else {
-      console.warn("closeBuyWindow not available");
+  const handleBuyClick = async () => {
+    try {
+      await axios.post("http://localhost:3002/order", {
+        name: uid,
+        qty: Number(stockQuantity),
+        price: Number(stockPrice),
+        stopLoss: stopLoss ? Number(stopLoss) : null,
+        target: target ? Number(target) : null,
+        mode: "BUY"
+      });
+
+      generalContext.refreshPositions?.();
+      generalContext.closeBuyWindow?.();
+    } catch (error) {
+      console.error("Error placing buy order:", error);
     }
   };
 
   const handleCancelClick = () => {
-    if (generalContext?.closeBuyWindow) {
-      generalContext.closeBuyWindow();
-    } else {
-      console.warn("closeBuyWindow not available");
-    }
+    generalContext.closeBuyWindow?.();
   };
 
   return (
@@ -73,7 +75,7 @@ const BuyWindow = ({ uid }) => {
         top: position.y,
         left: position.x,
         position: "absolute",
-        width: "300px"
+        width: "320px"
       }}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
@@ -83,7 +85,8 @@ const BuyWindow = ({ uid }) => {
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
       >
-        Buy Order
+        <span>Buy Order</span>
+        <button className="close-btn" onClick={handleCancelClick}>×</button>
       </div>
 
       <div className="regular-order">
@@ -94,6 +97,7 @@ const BuyWindow = ({ uid }) => {
               type="number"
               name="qty"
               id="qty"
+              min="1"
               onChange={(e) => setStockQuantity(e.target.value)}
               value={stockQuantity}
             />
@@ -109,11 +113,31 @@ const BuyWindow = ({ uid }) => {
               value={stockPrice}
             />
           </fieldset>
+          <fieldset>
+            <legend>Stop Loss</legend>
+            <input
+              type="number"
+              step="0.05"
+              placeholder="-"
+              value={stopLoss}
+              onChange={(e) => setStopLoss(e.target.value)}
+            />
+          </fieldset>
+          <fieldset>
+            <legend>Target</legend>
+            <input
+              type="number"
+              step="0.05"
+              placeholder="-"
+              value={target}
+              onChange={(e) => setTarget(e.target.value)}
+            />
+          </fieldset>
         </div>
       </div>
 
       <div className="buttons">
-        <span>Margin required ₹140.65</span>
+        <span>Margin required ₹{(stockQuantity * stockPrice).toFixed(2)}</span>
         <div>
           <Link className="btn btn-blue" onClick={handleBuyClick}>
             Buy

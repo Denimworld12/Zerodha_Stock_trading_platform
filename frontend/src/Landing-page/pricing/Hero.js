@@ -1,7 +1,7 @@
 import React from 'react';
 function Hero() {
     return (
-        <div className='container' style={{width:"1100px"}}>
+        <div className='container' style={{width:"1100px", paddingTop:"120px"}}>
             <div className='row text-center'>
                 <header style={{ paddingTop: "100px", paddingBottom: "100px" }}>
                     <h1 style={{ fontSize: "44px" }}>Charges</h1>

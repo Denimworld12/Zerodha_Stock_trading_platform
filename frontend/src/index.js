@@ -11,7 +11,7 @@ import Products from './Landing-page/product/Product'
 import AboutPage from './Landing-page/about/AboutPage'
 import Support from './Landing-page/support/SupportPage'
 import PageNotFound from './Landing-page/PageNotFound';
-
+import Login from './Landing-page/login/Login'
 
 
 
@@ -25,6 +25,7 @@ root.render(
       <Route path='/support' element={<Support/>} />
       <Route path='/signup' element={<Signup/>} />
       <Route path='/about' element={<AboutPage/>} />
+      <Route path='/login' element={ <Login/>}/>
       <Route path='/products' element={<Products />} />
       <Route path='/pricing' element={<Pricing />} />
       <Route path='*' element={<PageNotFound />} />

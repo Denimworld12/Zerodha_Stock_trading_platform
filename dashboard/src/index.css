@@ -34,6 +34,9 @@ code {
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  flex-direction: row;
+
+  
 }
 
 .funds p {
@@ -49,10 +52,13 @@ code {
   color: #fff;
   margin-right: 2px;
   margin-left: 2px;
+   display: inline-block;
+  white-space: nowrap;
+
 }
 
 .btn-green {
-  background: #4caf50;
+  background: #11bd17 !important;
 }
 
 .btn-blue {
@@ -103,7 +109,7 @@ code {
   justify-content: space-between;
 }
 
-.table .data > * {
+.table .data>* {
   margin-bottom: 5%;
 }
 
@@ -140,11 +146,11 @@ code {
 
 /* sudo selectors */
 .btn-blue:hover {
-  background: #74a7fa;
+  background: #9bb9e8;
 }
 
 .btn-green:hover {
-  background: #7bdd7f;
+  background: #9ddd9f;
 }
 
 .title {
@@ -247,6 +253,40 @@ code {
 /* sudo selector */
 .item:hover {
   cursor: pointer;
+}
+.profile {
+  position: relative;
+  cursor: pointer;
+}
+
+.custom-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  width: 120px;
+  z-index: 999;
+  padding: 8px;
+  transition: all 0.3s ease-in-out;
+}
+
+.dropdown-btn {
+  background: none;
+  border: none;
+  padding: 8px 12px;
+  width: 100%;
+  text-align: left;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+}
+
+.dropdown-btn:hover {
+  background-color: #f5f5f5;
+  border-radius: 6px;
 }
 
 .menu-container {
@@ -408,11 +448,11 @@ hr {
 }
 
 .order-table tr td:first-child p {
-    background: rgb(255, 197, 197);
-    color: rgb(233, 120, 120);
-    width: 50%;
-    text-align: center;
-    border-radius: 2px;
+  background: rgb(255, 197, 197);
+  color: rgb(233, 120, 120);
+  width: 50%;
+  text-align: center;
+  border-radius: 2px;
 }
 
 .order-table tr td:last-child {
@@ -580,7 +620,7 @@ hr {
   flex-basis: 32%;
   height: 100%;
   padding: 10px 20px;
-  
+
   border-right: 1px solid rgb(224, 224, 224);
   box-sizing: border-box;
   display: flex;
@@ -602,8 +642,8 @@ hr {
   justify-content: space-evenly;
 }
 
-.nifty > *,
-.sensex > * {
+.nifty>*,
+.sensex>* {
   margin-right: 8px;
 }
 
@@ -693,7 +733,7 @@ hr {
   align-items: center;
 }
 
-.item-info > * {
+.item-info>* {
   margin-right: 8px;
 }
 
@@ -721,11 +761,15 @@ hr {
   height: 100%;
 
   display: flex;
-  justify-content: flex-end;  /* push buttons to the right */
-  align-items: center;        /* center vertically */
+  justify-content: flex-end;
+  /* push buttons to the right */
+  align-items: center;
+  /* center vertically */
 
-  gap: 8px;  /* optional: spacing between buttons */
-  padding-right: 8px; /* optional: add a little padding from the right edge */
+  gap: 8px;
+  /* optional: spacing between buttons */
+  padding-right: 8px;
+  /* optional: add a little padding from the right edge */
 }
 
 .actions span button {
@@ -796,6 +840,7 @@ hr {
 .down {
   color: rgb(223, 73, 73);
   
+
 }
 
 .up {
@@ -817,7 +862,7 @@ hr {
   background-color: #f3f3f3;
 }
 
-.list li:hover > .actions {
+.list li:hover>.actions {
   display: flex;
   cursor: move;
 }
@@ -848,3 +893,124 @@ hr {
 }
 
 
+/* funds */
+/* .section {
+  padding: 20px;
+} */
+
+.row {
+  display: flex;
+  align-items: stretch;
+  padding: 0px;
+  margin: 0px;
+  gap: 20px;
+}
+
+.data-card {
+  flex: 1;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  padding: 20px;
+  background: #fff;
+  top: 0px;
+}
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  margin-bottom: 10px;
+}
+
+.card-head span {
+  font-size: 16px;
+  
+}
+
+.links a {
+  font-size: 0.8rem;
+  color: #007bff;
+  margin-left: 10px;
+  text-decoration: none;
+}
+
+.value-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 6px 0;
+}
+
+.value-row p {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.value-row h3 {
+  font-weight: normal;
+  font-size: 1rem;
+  color: #333;
+}
+
+.value-row h3.blue {
+  color: #2196f3;
+  font-size: 28px;
+  /* Blue like your screenshot */
+}
+h3.blue-2{
+    font-size: 28px;
+
+}
+hr {
+  margin: 10px 0;
+  border: none;
+  border-top: 1px solid #eee;
+}
+
+
+/* order */
+.orders {
+  padding: 20px;
+}
+
+.title {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.no-orders {
+  text-align: center;
+  margin-top: 100px;
+}
+
+.no-orders .btn {
+  margin-top: 10px;
+}
+
+.order-table {
+  overflow-x: auto;
+}
+
+.order-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.order-table th,
+.order-table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.buy {
+  color: green;
+  font-weight: bold;
+}
+
+.sell {
+  color: red;
+  font-weight: bold;
+}
