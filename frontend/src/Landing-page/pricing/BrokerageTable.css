@@ -1,0 +1,17 @@
+ .bt{
+  text-decoration: none !important;
+  border-bottom: 3px solid transparent;
+  transition: border-bottom 0.2s;
+  cursor: pointer;
+}
+
+
+
+.bt.active  {
+  border-bottom: 3px solid #0d6efd;
+  color: rgb(58, 57, 57);
+  
+}
+td{
+    padding: 12px 15px;
+}

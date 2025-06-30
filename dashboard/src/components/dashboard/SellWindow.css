@@ -1,0 +1,156 @@
+  .buy-popup {
+    background: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    border-radius: 8px;
+    user-select: none;
+    position: absolute;
+    width: 300px;
+  }
+  .sell-popup {
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    user-select: none;
+    width: 300px;
+  }
+.sell-popup,
+.buy-popup {
+  width: 360px; /* Increased from 300px */
+}
+
+/* Flex layout adapts better to wider input */
+.inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px;
+}
+
+.inputs fieldset {
+  flex: 1 1 48%;  /* wider than 40% previously */
+  min-width: 140px;
+}
+
+.inputs input {
+  width: 100%;
+  padding: 6px 8px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  font-family: monospace; /* Optional: improves digit spacing */
+  overflow-x: auto;        /* Enables scroll if text is too wide */
+}
+
+  .popup-header-sell {
+    background-color: #ff6600;
+    color: white;
+    padding: 10px;
+    cursor: move;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  .regular-order {
+    padding: 10px;
+  }
+
+  .inputs {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .inputs fieldset {
+    margin-bottom: 10px;
+    border: none;
+    max-width: 120px;
+  }
+
+  .inputs legend {
+    font-size: 0.8rem;
+  }
+
+  .inputs input {
+    width: 100%;
+    padding: 5px;
+    box-sizing: border-box;
+    font-size: 1rem;
+  }
+
+  .buttons {
+    padding: 10px;
+    text-align: center;
+  }
+
+  .buttons span {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.8rem;
+  }
+
+  .buttons .btn {
+    padding: 6px 12px;
+    margin: 5px;
+    text-decoration: none;
+    color: white;
+    border-radius: 4px;
+  }
+
+  .btn-red {
+    background-color: #ff002b;
+  }
+
+  .btn-blue:hover {
+    background: #f1570a;
+  }
+
+  .btn-grey {
+    background-color: #6c757d;
+  }
+
+  .btn-grey:hover {
+    background: #9b9b9b;
+    color: #fff;
+  }
+  .popup-header-sell {
+    background-color: #d32f2f;
+    color: white;
+    padding: 8px 12px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: move;
+  }
+
+  .close-btn {
+    background: transparent;
+    color: white;
+    font-size: 18px;
+    border: none;
+    cursor: pointer;
+  }
+
+  .inputs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px;
+  }
+
+  fieldset {
+    border: 1px solid #ddd;
+    padding: 4px 8px;
+    flex: 1 1 40%;
+  }
+
+  input {
+    width: 100%;
+    border: none;
+    outline: none;
+  }
+  .buy-popup {
+    background: white;
+  }
