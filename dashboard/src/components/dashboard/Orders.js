@@ -21,9 +21,11 @@ const Orders = () => {
   }, [subscribe]);
 
   // Handle close (delete) order
-  const handleCloseOrder = async (id) => {
+  const handleCloseOrder = async (id, livePrice) => {
     try {
-      await axios.delete(`http://localhost:3002/order/${id}`);
+      await axios.delete(`http://localhost:3002/order/${id}`, {
+        data: { livePrice } // ✅ Send live price in DELETE body
+      });
       setOrders((prev) => prev.filter((order) => order._id !== id));
     } catch (err) {
       console.error("Failed to delete order:", err);
@@ -91,17 +93,18 @@ const Orders = () => {
                       <td>{order.livePrice.toFixed(2)}</td>
                       <td>{order.curValue.toFixed(2)}</td>
                       <td className={profitClass}>{order.pnl.toFixed(2)}</td>
-                      <td className={typeClass}>{order.mode}</td>
+                      <td className="">{order.mode}</td>
                       <td>{stopLoss}</td>
                       <td>{target}</td>
                       <td>{orderTime}</td>
                       <td>
                         <button
-                          className="btn btn-close"
-                          onClick={() => handleCloseOrder(order._id)}
+                          className="btn"
+                          onClick={() => handleCloseOrder(order._id, order.livePrice)} // ✅ Send livePrice
                         >
                           Close
                         </button>
+
                       </td>
                     </tr>
                   );
@@ -111,10 +114,11 @@ const Orders = () => {
           </div>
 
           <div className="row mt-3">
-            <div className="col">
-              <h5 className={isNetProfit ? "profit" : "loss"}>
-                Total P&L: {totalPL.toFixed(2)}
+            <div className="col"> Total P&L:
+              <h5 className={totalPL >= 0 ? "text-success" : "text-danger"}>
+                {totalPL.toFixed(2)}
               </h5>
+
               <p>Real-time Profit or Loss from open orders</p>
             </div>
           </div>

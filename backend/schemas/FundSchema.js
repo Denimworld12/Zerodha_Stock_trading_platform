@@ -14,7 +14,15 @@ const FundSchema = new mongoose.Schema({
   usedMargin: {
     type: Number,
     default: 0
+  },
+  payin: {
+    type: Number,
+    default: 0
+  },
+  payout: {
+    type: Number,
+    default: 0
   }
 }, { timestamps: true });
 
-module.exports = FundSchema;
+module.exports = {FundSchema};

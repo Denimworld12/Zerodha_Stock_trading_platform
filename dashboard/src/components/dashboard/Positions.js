@@ -3,7 +3,7 @@ import GeneralContext from "./GeneralContext";
 
 const Positions = () => {
   const { positions } = useContext(GeneralContext);
-
+    
   return (
     <>
       <h3 className="title">Positions ({positions.length})</h3>

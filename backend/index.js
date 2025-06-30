@@ -47,6 +47,75 @@ app.get("/order", async (req, res) => {
         res.status(500).send("Failed to fetch orders");
     }
 });
+app.delete("/order/:id", async (req, res) => {
+  try {
+    const orderId = req.params.id;
+    const { livePrice } = req.body;
+
+    if (!livePrice || isNaN(livePrice)) {
+      return res.status(400).send("Missing or invalid live price");
+    }
+
+    const order = await OrderModel.findById(orderId);
+    if (!order) return res.status(404).send("Order not found");
+
+    const currentValue = order.qty * livePrice;
+    const originalCost = order.qty * order.price;
+
+    const fund = await Fund.findOne();
+    if (!fund) return res.status(500).send("Fund not found");
+
+    if (order.mode === "BUY") {
+      // Closing BUY: recover current market value
+      fund.availableCash += currentValue;
+      fund.usedMargin -= originalCost;
+    } else {
+      // Closing SELL: pay back the cost to repurchase at livePrice
+      fund.availableCash += (originalCost - currentValue); // profit or loss
+      fund.usedMargin -= originalCost;
+    }
+
+    fund.usedMargin = Math.max(0, fund.usedMargin);
+    await fund.save();
+
+    await OrderModel.findByIdAndDelete(orderId);
+    res.send("Order closed and funds updated");
+  } catch (err) {
+    console.error("Error closing order:", err);
+    res.status(500).send("Failed to close order");
+  }
+});
+
+app.put("/funds", async (req, res) => {
+  try {
+    const { type, amount } = req.body;
+
+    if (!type || !["add", "withdraw"].includes(type)) {
+      return res.status(400).send("Invalid fund type");
+    }
+
+    const fund = await Fund.findOne();
+    if (!fund) return res.status(404).send("Fund not found");
+
+    if (type === "add") {
+      fund.availableCash += amount;
+      fund.payin = (fund.payin || 0) + amount;
+    } else {
+      if (fund.availableCash < amount) {
+        return res.status(400).send("Insufficient funds to withdraw");
+      }
+      fund.availableCash -= amount;
+      fund.payout = (fund.payout || 0) + amount;
+    }
+
+    await fund.save(); // <- don't forget this!
+    res.json(fund);
+  } catch (error) {
+    console.error("Failed to update fund:", error);
+    res.status(500).send("Failed to update fund");
+  }
+});
+
 
 // ✅ FIXED: Use GET instead of POST
 app.get("/funds", async (req, res) => {
