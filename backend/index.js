@@ -18,6 +18,12 @@ app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ✅ Get all holdings
+app.get("/",(req,res)=>{
+    res.send({
+        activeStatus: true,
+        error:false,
+    })
+})
 app.get('/holding', async (req, res) => {
     try {
         const allHolding = await HoldingModel.find({});
