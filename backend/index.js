@@ -230,6 +230,9 @@ app.post('/order', async (req, res) => {
     }
 });
 
+app.post("/login", (req, res) => { 
+    res.send("no need")
+});
 
 app.listen(PORT, () => {
     console.log('✅ Server running on PORT', PORT);

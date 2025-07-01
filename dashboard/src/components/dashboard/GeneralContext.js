@@ -22,7 +22,7 @@ export const GeneralContextProvider = (props) => {
   // Fetch latest positions from backend
   const refreshPositions = async () => {
     try {
-      const res = await axios.get(`${process.env.DATABASE_LINK}/position`);
+      const res = await axios.get(`${process.env.REACT_APP_DATABASE_LINK}/position`);
       setPositions(res.data);
     } catch (error) {
       console.error("Error fetching positions:", error);

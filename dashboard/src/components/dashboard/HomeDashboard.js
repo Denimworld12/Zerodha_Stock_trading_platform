@@ -10,7 +10,7 @@ import Positions from "./Positions";
 import Summary from "./Summary";
 import WatchList from "./WatchList";
 import { GeneralContextProvider } from "./GeneralContext";
-import { StrictMode } from "react";
+import LoginModal from "./LoginModal";
 
 const HomeDashboard = () => {
   return (
@@ -28,6 +28,7 @@ const HomeDashboard = () => {
           <Route path="/positions" element={<Positions />} />
           <Route path="/funds" element={<Funds />} />
           <Route path="/charts" element={<Apps />} />
+          <Route path="/login" element={< LoginModal/>} />
         </Routes>
       </div>
     </div>

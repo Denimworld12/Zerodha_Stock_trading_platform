@@ -55,14 +55,14 @@ const BuyWindow = ({ uid }) => {
     setDragging(false);
   };
 
-  const incrementPrice = () =>
-    setStockPrice((prev) => parseFloat((+prev + 0.05).toFixed(2)));
-  const decrementPrice = () =>
-    setStockPrice((prev) => parseFloat((+prev - 0.05).toFixed(2)));
+  // const incrementPrice = () =>
+  //   setStockPrice((prev) => parseFloat((+prev + 0.05).toFixed(2)));
+  // const decrementPrice = () =>
+  //   setStockPrice((prev) => parseFloat((+prev - 0.05).toFixed(2)));
 
   const handleBuyClick = async () => {
     try {
-      await axios.post(`${process.env.DATABASE_LINK}/order`, {
+      await axios.post(`${process.env.REACT_APP_DATABASE_LINK}/order`, {
         name: uid,
         qty: Number(stockQuantity),
         price: Number(stockPrice),

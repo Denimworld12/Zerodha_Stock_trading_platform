@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './LoginModal.css'; // Optional custom styling
+
 import axios from 'axios';
 
 const LoginModal = ({ onClose, onSuccess }) => {
@@ -12,7 +12,7 @@ const LoginModal = ({ onClose, onSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`${process.env.DATABASE_LINK}/login`, formData);
+      const res = await axios.post(`${process.env.REACT_APP_DATABASE_LINK}/login`, formData);
       localStorage.setItem('token', res.data.token);
       onSuccess(); // Call back to navigate to dashboard
     } catch (err) {

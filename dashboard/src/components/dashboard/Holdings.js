@@ -9,7 +9,7 @@ const Holdings = () => {
 
   // 1. Load Holdings from backend
   useEffect(() => {
-    axios.get(`${process.env.DATABASE_LINK}/holding`).then((res) => {
+    axios.get(`${process.env.REACT_APP_DATABASE_LINK}/holding`).then((res) => {
       setHoldings(res.data);
     });
   }, []);

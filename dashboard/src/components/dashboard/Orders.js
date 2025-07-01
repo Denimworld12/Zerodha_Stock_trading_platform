@@ -10,7 +10,7 @@ const Orders = () => {
   // Load orders and subscribe to symbols
   useEffect(() => {
     axios
-      .get(`${process.env.DATABASE_LINK}/order`)
+      .get(`${process.env.REACT_APP_DATABASE_LINK}/order`)
       .then((res) => {
         setOrders(res.data);
         res.data.forEach((order) => {
@@ -23,7 +23,7 @@ const Orders = () => {
   // Handle close (delete) order
   const handleCloseOrder = async (id, livePrice) => {
     try {
-      await axios.delete(`${process.env.DATABASE_LINK}/order/${id}`, {
+      await axios.delete(`${process.env.REACT_APP_DATABASE_LINK}/order/${id}`, {
         data: { livePrice } // ✅ Send live price in DELETE body
       });
       setOrders((prev) => prev.filter((order) => order._id !== id));
@@ -48,7 +48,7 @@ const Orders = () => {
   });
 
   const totalPL = mergedOrders.reduce((sum, o) => sum + o.pnl, 0);
-  const isNetProfit = totalPL >= 0;
+  // const isNetProfit = totalPL >= 0;
 
   return (
     <div className="orders">
@@ -80,7 +80,7 @@ const Orders = () => {
               <tbody>
                 {mergedOrders.map((order, idx) => {
                   const orderTime = new Date(order.createdAt).toLocaleString();
-                  const typeClass = order.mode === "BUY" ? "buy" : "sell";
+                  // const typeClass = order.mode === "BUY" ? "buy" : "sell";
                   const profitClass = order.pnl >= 0 ? "profit" : "loss";
                   const stopLoss = order.stopLoss || "-";
                   const target = order.target || "-";

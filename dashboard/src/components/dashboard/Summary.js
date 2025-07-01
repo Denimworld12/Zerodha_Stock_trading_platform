@@ -13,7 +13,7 @@ const Summary = () => {
     });
 
     // Fetch fund data
-    axios.get(`${process.env.DATABASE_LINK}/funds`).then((res) => {
+    axios.get(`${process.env.REACT_APP_DATABASE_LINK}/funds`).then((res) => {
       setFunds(res.data);
     });
   }, []);
