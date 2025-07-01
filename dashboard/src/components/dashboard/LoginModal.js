@@ -12,7 +12,7 @@ const LoginModal = ({ onClose, onSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:5000/api/login', formData);
+      const res = await axios.post(`${process.env.DATABASE_LINK}/login`, formData);
       localStorage.setItem('token', res.data.token);
       onSuccess(); // Call back to navigate to dashboard
     } catch (err) {

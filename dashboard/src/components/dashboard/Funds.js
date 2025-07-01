@@ -10,7 +10,7 @@ const Funds = () => {
   // Fetch funds initially
   useEffect(() => {
     axios
-      .get("http://localhost:3002/funds")
+      .get(`${process.env.DATABASE_LINK}/funds`)
       .then((res) => setFund(res.data))
       .catch((err) => console.error("Failed to fetch fund:", err));
   }, []);
@@ -24,7 +24,7 @@ const Funds = () => {
 
     setIsLoading(true);
     try {
-      const res = await axios.put("http://localhost:3002/funds", {
+      const res = await axios.put(`${process.env.DATABASE_LINK}/funds`, {
         type: modalType,
         amount: amt,
       });

@@ -8,12 +8,12 @@ const Summary = () => {
 
   useEffect(() => {
     // Fetch holdings
-    axios.get("http://localhost:3002/holding").then((res) => {
+    axios.get(`${process.env.DATABASE_LINK}/holding`).then((res) => {
       setHoldings(res.data);
     });
 
     // Fetch fund data
-    axios.get("http://localhost:3002/funds").then((res) => {
+    axios.get(`${process.env.DATABASE_LINK}/funds`).then((res) => {
       setFunds(res.data);
     });
   }, []);

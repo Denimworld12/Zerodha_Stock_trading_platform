@@ -10,7 +10,7 @@ const Orders = () => {
   // Load orders and subscribe to symbols
   useEffect(() => {
     axios
-      .get("http://localhost:3002/order")
+      .get(`${process.env.DATABASE_LINK}/order`)
       .then((res) => {
         setOrders(res.data);
         res.data.forEach((order) => {
@@ -23,7 +23,7 @@ const Orders = () => {
   // Handle close (delete) order
   const handleCloseOrder = async (id, livePrice) => {
     try {
-      await axios.delete(`http://localhost:3002/order/${id}`, {
+      await axios.delete(`${process.env.DATABASE_LINK}/order/${id}`, {
         data: { livePrice } // ✅ Send live price in DELETE body
       });
       setOrders((prev) => prev.filter((order) => order._id !== id));

@@ -62,7 +62,7 @@ const SellWindow = ({ uid }) => {
 
   const handleSellClick = async () => {
     try {
-      await axios.post("http://localhost:3002/order", {
+      await axios.post(`${process.env.DATABASE_LINK}/order`, {
         name: uid,
         qty: Number(stockQuantity),
         price: Number(stockPrice),
