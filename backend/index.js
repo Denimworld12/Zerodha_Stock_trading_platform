@@ -231,9 +231,9 @@ app.post('/order', async (req, res) => {
 });
 
 // ✅ Start server
-app.listen(PORT, () => {
-    console.log('✅ Server running on PORT', PORT);
-    mongoose.connect(url)
-        .then(() => console.log("✅ DB is working Nikhil"))
-        .catch((err) => console.error("❌ DB connection failed:", err));
-});
+// app.listen(PORT, () => {
+//     console.log('✅ Server running on PORT', PORT);
+//     mongoose.connect(url)
+//         .then(() => console.log("✅ DB is working Nikhil"))
+//         .catch((err) => console.error("❌ DB connection failed:", err));
+// });
