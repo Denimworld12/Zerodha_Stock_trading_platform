@@ -1,15 +1,18 @@
 import React from "react";
 
-import Dashboard from "./dashboard/HomeDashboard";
+import HomeDashboard from "./dashboard/HomeDashboard";
 import TopBar from "./TopBar";
-import { FinnhubProvider } from "./data/FinnhubContext";
+// import { FinnhubProvider } from "./data/FinnhubContext";
 const Home = () => {
   return (
     <>
-      <TopBar />
-      <FinnhubProvider>
-        <Dashboard />
-      </FinnhubProvider>
+    
+      {/* <FinnhubProvider> */}
+     <div className="container-fluid p-0">
+        <TopBar />
+        <HomeDashboard />
+      </div>
+      {/* </FinnhubProvider> */}
     </>
   );
 };

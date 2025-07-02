@@ -10,29 +10,31 @@ import Positions from "./Positions";
 import Summary from "./Summary";
 import WatchList from "./WatchList";
 import { GeneralContextProvider } from "./GeneralContext";
-import LoginModal from "./LoginModal";
+
+import { FinnhubProvider } from "../data/FinnhubContext";
 
 const HomeDashboard = () => {
   return (
     <div className="dashboard-container">
-      <GeneralContextProvider>
-        <WatchList />
-      </GeneralContextProvider>
+      <FinnhubProvider>
+        <GeneralContextProvider>
+          <WatchList />
+        </GeneralContextProvider>
 
-
-      <div className="content">
-        <Routes>
-          <Route exact path="/" element={<Summary />} />
-          <Route path="/orders" element={<Orders />} />
-          <Route path="/holdings" element={<Holdings />} />
-          <Route path="/positions" element={<Positions />} />
-          <Route path="/funds" element={<Funds />} />
-          <Route path="/charts" element={<Apps />} />
-          <Route path="/login" element={< LoginModal/>} />
-        </Routes>
-      </div>
+        <div className="content">
+          <Routes>
+            <Route exact path="/" element={<Summary />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/holdings" element={<Holdings />} />
+            <Route path="/positions" element={<Positions />} />
+            <Route path="/funds" element={<Funds />} />
+            <Route path="/charts" element={<Apps />} />
+          </Routes>
+        </div>
+      </FinnhubProvider>
     </div>
   );
 };
+
 
 export default HomeDashboard;

@@ -230,7 +230,7 @@ app.post('/order', async (req, res) => {
     }
 });
 
-app.post("/login", (req, res) => { 
+app.get("/login", (req, res) => { 
     res.send("no need")
 });
 
