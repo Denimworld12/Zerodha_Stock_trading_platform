@@ -1,0 +1,23 @@
+# Python quant stack
+.venv/
+__pycache__/
+*.py[cod]
+quant/data_cache/
+quant/artifacts/
+.ipynb_checkpoints/
+
+# Node
+node_modules/
+build/
+dist/
+
+# Secrets - backend/.env is ALREADY COMMITTED and its Mongo credentials must be
+# rotated; this only stops the next one.
+.env
+.env.*
+!.env.example
+
+# OS / editor
+.DS_Store
+*.swp
+.devlogs/
