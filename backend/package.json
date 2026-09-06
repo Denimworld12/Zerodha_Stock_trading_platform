@@ -3,7 +3,14 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "seed": "node scripts/seed.js",
+    "migrate": "node scripts/migrate.js",
+    "migrate:status": "node scripts/migrate.js status",
+    "test": "node --test test/*.test.js",
+    "e2e": "node scripts/e2e.js",
+    "test:isolation": "node scripts/probe-isolation.js"
   },
   "keywords": [],
   "author": "",
@@ -14,11 +21,17 @@
   },
   "dependencies": {
     "body-parser": "^2.2.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "express-rate-limit": "^8.7.0",
+    "helmet": "^8.3.0",
+    "jose": "^6.2.12",
     "mongoose": "^8.16.0",
     "passport": "^0.7.0",
-    "passport-local-mongoose": "^8.0.0"
+    "passport-local-mongoose": "^8.0.0",
+    "ws": "^8.21.3",
+    "zod": "^4.5.4"
   }
 }

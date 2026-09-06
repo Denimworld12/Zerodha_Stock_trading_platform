@@ -12,10 +12,37 @@ const { HoldingModel } = require('./model/HoldingModel');
 const { PositionModel } = require('./model/PositionModel');
 const { OrderModel } = require('./model/OrderModel');
 const { Fund } = require('./model/FundModel');
+const signalRoutes = require('./routes/signals');
+const v2Routes = require('./routes/v2');
+const authRoutes = require('./routes/auth');
+const helmet = require('helmet');
+const cookieParser = require('cookie-parser');
 
-app.use(cors());
-app.use(bodyParser.json());
-app.use(express.urlencoded({ extended: true }));
+// helmet sets the standard security headers (nosniff, frameguard, HSTS...).
+// contentSecurityPolicy is off because this process only serves JSON; the
+// React apps are served separately and set their own.
+app.use(helmet({ contentSecurityPolicy: false }));
+app.use(cookieParser());
+
+// CORS was wide open (`cors()` with no options), which lets any site on the
+// internet call this API with the visitor's credentials. Restricted to the
+// origins we actually ship.
+const ALLOWED_ORIGINS = (process.env.CORS_ORIGINS ||
+  'http://localhost:3000,http://localhost:3001').split(',').map((o) => o.trim());
+app.use(cors({
+  origin(origin, cb) {
+    // No Origin header = curl, a mobile app, or a server-to-server call.
+    if (!origin) return cb(null, true);
+    if (ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
+    cb(new Error(`origin ${origin} is not allowed`));
+  },
+  // Required so the browser will send the httpOnly refresh cookie.
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization', 'Idempotency-Key', 'X-Signal-Secret'],
+}));
+
+app.use(bodyParser.json({ limit: '256kb' }));
+app.use(express.urlencoded({ extended: true, limit: '256kb' }));
 
 // ✅ Get all holdings
 app.get("/",(req,res)=>{
@@ -24,6 +51,16 @@ app.get("/",(req,res)=>{
         error:false,
     })
 })
+app.use('/signals', signalRoutes);
+
+// Local email+password auth. Auth0 is accepted alongside these whenever
+// AUTH0_DOMAIN and AUTH0_AUDIENCE are set — no code change needed.
+app.use('/api/auth', authRoutes);
+
+// The v2 API: authenticated, tenant-scoped, ledger-backed, server-priced.
+// The legacy routes below stay mounted until the dashboard finishes moving.
+app.use('/api/v2', v2Routes);
+
 app.get('/holding', async (req, res) => {
     try {
         const allHolding = await HoldingModel.find({});
@@ -230,10 +267,88 @@ app.post('/order', async (req, res) => {
     }
 });
 
-// ✅ Start server
-app.listen(PORT, () => {
-    console.log('✅ Server running on PORT', PORT);
-    mongoose.connect(url)
-        .then(() => console.log("✅ DB is working Nikhil"))
-        .catch((err) => console.error("❌ DB connection failed:", err));
+// ---------------------------------------------------------------------------
+// Database connection.
+//
+// This used to sit INSIDE the app.listen callback. On Vercel (see versel.json,
+// which deploys this file with @vercel/node) app.listen never runs, so mongoose
+// never connected and every route hung until it timed out. Connecting at module
+// load fixes serverless; caching the promise stops each warm invocation from
+// opening another pool.
+// ---------------------------------------------------------------------------
+let dbPromise = null;
+
+function connectDB() {
+    if (!url) {
+        return Promise.reject(new Error("MONGO_URL is not set (see backend/.env.example)"));
+    }
+    if (!dbPromise) {
+        dbPromise = mongoose
+            .connect(url, { serverSelectionTimeoutMS: 10000 })
+            .then((conn) => {
+                console.log("✅ MongoDB connected");
+                return conn;
+            })
+            .catch((err) => {
+                dbPromise = null;   // let the next request retry instead of caching the failure
+                console.error("❌ DB connection failed:", err.message);
+                throw err;
+            });
+    }
+    return dbPromise;
+}
+
+connectDB().catch(() => { /* logged above; routes surface it per-request */ });
+
+// ---------------------------------------------------------------------------
+// Error handler. Must be registered AFTER every route, and must take four
+// arguments or Express treats it as ordinary middleware and never calls it.
+// ---------------------------------------------------------------------------
+app.use((err, req, res, _next) => {
+    // A blocked cross-origin request is a rejected request, not a server fault.
+    // Returning 500 for it misreports our own health and hides the real cause
+    // from whoever is debugging their integration.
+    if (err && /not allowed/.test(err.message || '')) {
+        return res.status(403).json({ error: err.message, code: 'CORS_ORIGIN_DENIED' });
+    }
+    if (err && err.type === 'entity.too.large') {
+        return res.status(413).json({ error: 'request body too large', code: 'PAYLOAD_TOO_LARGE' });
+    }
+    console.error('unhandled:', err);
+    res.status(500).json({ error: 'internal error', code: 'INTERNAL' });
 });
+
+// Only listen when run directly. Under @vercel/node the export is what matters.
+if (require.main === module) {
+    const http = require('http');
+    const server = http.createServer(app);
+
+    // The browser-facing socket shares the HTTP server, so there is one port to
+    // expose and CORS/proxy configuration applies to both.
+    const { attach } = require('./lib/wsserver');
+    const ws = attach(server, { path: '/ws' });
+
+    // Start the upstream market feed once, at boot, rather than lazily on the
+    // first request - a cold feed means the first order hits STALE_PRICE.
+    require('./lib/prices').getFeed();
+
+    server.listen(PORT, () => {
+        console.log('✅ API      http://localhost:' + PORT);
+        console.log('✅ WebSocket ws://localhost:' + PORT + '/ws');
+        const auth = require('./lib/auth').describeConfig();
+        console.log('   auth:', auth.mode + (auth.warning ? ' — ' + auth.warning : ''));
+    });
+
+    // Close sockets and the feed before exiting, or nodemon restarts leak both.
+    const shutdown = (signal) => {
+        console.log(`\n${signal} received, shutting down`);
+        ws.close();
+        require('./lib/prices').getFeed().stop();
+        server.close(() => mongoose.disconnect().finally(() => process.exit(0)));
+        setTimeout(() => process.exit(1), 5000).unref();
+    };
+    process.on('SIGINT', () => shutdown('SIGINT'));
+    process.on('SIGTERM', () => shutdown('SIGTERM'));
+}
+
+module.exports = app;
