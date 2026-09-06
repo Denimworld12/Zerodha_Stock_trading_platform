@@ -1,195 +1,171 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useCallback, useEffect, useState } from "react";
+import * as api from "../../lib/api";
+import "./Funds.css";
+
+/**
+ * Funds, derived from the ledger.
+ *
+ * The old version read a single mutable `Fund` document that the server
+ * incremented in place — no history, and no way to tell when a wrong balance
+ * went wrong. These numbers are the sum of the account's ledger entries, so
+ * every one of them is traceable to the postings that produced it.
+ *
+ * Amounts are STRINGS all the way from the database to this component. Parsing
+ * them into JavaScript numbers for display is fine; parsing them to do
+ * arithmetic is not, because doubles cannot represent decimal money exactly.
+ */
+
+const money = (value, currency = "INR") => {
+  if (value === null || value === undefined) return "—";
+  const n = Number(value);
+  if (Number.isNaN(n)) return String(value);
+  return n.toLocaleString("en-IN", {
+    style: "currency", currency, maximumFractionDigits: 2,
+  });
+};
 
 const Funds = () => {
-  const [fund, setFund] = useState(null);
-  const [modalType, setModalType] = useState(null); // 'add' or 'withdraw'
+  const [balances, setBalances] = useState(null);
+  const [currency, setCurrency] = useState("INR");
+  const [auditResult, setAuditResult] = useState(null);
   const [amount, setAmount] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(null);
+  const [notice, setNotice] = useState(null);
 
-  // Fetch funds initially
-  useEffect(() => {
-    axios
-      .get("http://localhost:3002/funds")
-      .then((res) => setFund(res.data))
-      .catch((err) => console.error("Failed to fetch fund:", err));
+  const load = useCallback(async () => {
+    try {
+      const [b, a] = await Promise.all([api.balances(), api.audit()]);
+      setBalances(b.balances);
+      setCurrency(b.currency);
+      setAuditResult(a);
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+    }
   }, []);
 
-  const handleUpdateFund = async () => {
-    const amt = parseFloat(amount);
-    if (isNaN(amt) || amt <= 0) {
-      alert("Enter a valid amount");
+  useEffect(() => { load(); }, [load]);
+
+  const submitDeposit = async (e) => {
+    e.preventDefault();
+    const amt = amount.trim();
+    if (!amt || Number(amt) <= 0) {
+      setError("Enter an amount greater than zero");
       return;
     }
-
-    setIsLoading(true);
+    setBusy(true);
+    setError(null);
     try {
-      const res = await axios.put("http://localhost:3002/funds", {
-        type: modalType,
-        amount: amt,
-      });
-      setFund(res.data);
+      const res = await api.deposit(amt);
+      setBalances(res.balances);
       setAmount("");
-      setModalType(null);
+      setNotice(`Added ${money(amt, currency)} to your paper account`);
+      setTimeout(() => setNotice(null), 4000);
+      load();
     } catch (err) {
-      console.error("Fund update failed:", err);
-      alert("Transaction failed");
+      setError(err.message);
     } finally {
-      setIsLoading(false);
+      setBusy(false);
     }
   };
 
-  if (!fund) return <p>Loading fund data...</p>;
+  const reset = async () => {
+    if (!window.confirm("Reset this paper account to its opening balance?")) return;
+    setBusy(true);
+    try {
+      const res = await api.resetAccount();
+      setBalances(res.balances);
+      setNotice("Paper account reset. The adjustment is recorded in your ledger.");
+      setTimeout(() => setNotice(null), 5000);
+      load();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (error && !balances) return <div className="funds-error">{error}</div>;
+  if (!balances) return <p className="funds-loading">Loading…</p>;
+
+  const rows = [
+    ["Available cash", balances.cash, "Settled and free to trade"],
+    ["Used margin", balances.margin, "Committed to open positions"],
+    ["Realised P&L", balances.pnl ? String(-Number(balances.pnl)) : "0", "Booked on closed trades"],
+    ["Fees paid", balances.fees, "Commission and spread"],
+  ];
 
   return (
-    <>
-      {/* Top Funds Bar */}
-      <div className="funds d-flex gap-3 align-items-center">
-        <p className="my-auto">
-          Instant, zero-cost fund transfers with{" "}
-          <img
-            src="media/images/UPI.svg"
-            alt="UPI"
-            style={{ width: "5%", verticalAlign: "middle" }}
-          />
-        </p>
-        <button
-          className="btn btn-green"
-          onClick={() => setModalType("add")}
-        >
-          Add funds
-        </button>
-        <button
-          className="btn btn-blue"
-          onClick={() => setModalType("withdraw")}
-        >
-          Withdraw
-        </button>
+    <div className="funds-page">
+      <div className="funds-header">
+        <div>
+          <h3>Funds</h3>
+          <p className="funds-sub">
+            Every figure below is the sum of your ledger entries, not a stored number.
+          </p>
+        </div>
+        <div className="funds-equity">
+          <span className="label">Equity</span>
+          <span className="value">{money(balances.equity, currency)}</span>
+        </div>
       </div>
 
-      {/* Modal */}
-      {modalType && (
-        <div className="modal d-block" tabIndex="-1" style={{ backgroundColor: "#00000066" }}>
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content p-3">
-              <div className="modal-header">
-                <h5 className="modal-title">
-                  {modalType === "add" ? "Add Funds" : "Withdraw Funds"}
-                </h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setModalType(null)}
-                ></button>
-              </div>
-              <div className="modal-body">
-                <input
-                  type="number"
-                  placeholder="Enter amount"
-                  className="form-control"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                />
-              </div>
-              <div className="modal-footer">
-                <button
-                  className="btn btn-secondary"
-                  onClick={() => setModalType(null)}
-                >
-                  Cancel
-                </button>
-                <button
-                  className={`btn ${modalType === "add" ? "btn-success" : "btn-primary"}`}
-                  onClick={handleUpdateFund}
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Processing..." : modalType === "add" ? "Add" : "Withdraw"}
-                </button>
-              </div>
-            </div>
+      {notice && <div className="funds-notice">{notice}</div>}
+      {error && <div className="funds-error">{error}</div>}
+
+      <div className="funds-grid">
+        {rows.map(([label, value, hint]) => (
+          <div className="funds-tile" key={label}>
+            <span className="tile-label">{label}</span>
+            <span className="tile-value">{money(value, currency)}</span>
+            <span className="tile-hint">{hint}</span>
           </div>
+        ))}
+      </div>
+
+      {/* An audit is cheap and it is the only real safety net, so it is shown
+          rather than hidden behind an admin page. */}
+      {auditResult && (
+        <div className={`funds-audit ${auditResult.ok ? "ok" : "bad"}`}>
+          {auditResult.ok ? (
+            <>
+              <strong>Books balance.</strong> Debits equal credits across{" "}
+              {auditResult.perCurrency?.[0]?.entries ?? 0} ledger entries.
+            </>
+          ) : (
+            <>
+              <strong>Ledger does not balance.</strong>{" "}
+              {auditResult.unbalancedTransactions?.length} unbalanced transaction(s).
+              This should never happen — please report it.
+            </>
+          )}
         </div>
       )}
 
-      {/* Funds Section */}
-      <div className="section mt-5">
-        <div className="row">
-          {/* Equity Card */}
-          <div className="data-card">
-            <div className="card-head">
-              <span>
-                <i className="fa-solid fa-chart-pie px-2" />
-                Equity
-              </span>
-              <div className="links">
-                <a href="#">
-                  <i className="fa-solid fa-chart-pie fa-2xs" style={{ color: "#3a5af8" }} /> View
-                  statement
-                </a>
-                <a href="#">
-                  <i className="fa-solid fa-circle-info fa-2xs" style={{ color: "#5d67f9" }} /> Help
-                </a>
-              </div>
-            </div>
+      <form className="funds-actions" onSubmit={submitDeposit}>
+        <label>
+          <span>Add paper funds</span>
+          <input
+            type="text" inputMode="decimal" value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="10000" disabled={busy}
+          />
+        </label>
+        <button type="submit" className="btn-primary" disabled={busy}>
+          {busy ? "Working…" : "Deposit"}
+        </button>
+        <button type="button" className="btn-ghost" onClick={reset} disabled={busy}>
+          Reset account
+        </button>
+      </form>
 
-            <div className="value-row">
-              <p>Available margin</p>
-              <h3 className="blue">{(fund.availableCash).toFixed(2)}</h3>
-            </div>
-            <div className="value-row">
-              <p>Used margin</p>
-              <h3 className="blue-2">{(fund.usedMargin).toFixed(2)}</h3>
-            </div>
-            <div className="value-row">
-              <p>Available cash</p>
-              <h3 className="blue-2">{(fund.availableCash).toFixed(2)}</h3>
-            </div>
-            <hr />
-            <div className="value-row">
-              <p>Opening balance</p>
-              <h3>{(fund.openingBalance).toFixed(2)}</h3>
-            </div>
-            <div className="value-row">
-              <p>Payin</p>
-              <h3>{(fund.payin || 0).toFixed(2)}</h3>
-            </div>
-            <div className="value-row">
-              <p>Payout</p>
-              <h3>{(fund.payout || 0).toFixed(2)}</h3>
-            </div>
-            <div className="value-row"><p>SPAN</p><h3>0.00</h3></div>
-            <div className="value-row"><p>Delivery margin</p><h3>0.00</h3></div>
-            <div className="value-row"><p>Exposure</p><h3>0.00</h3></div>
-            <div className="value-row"><p>Options premium</p><h3>0.00</h3></div>
-            <div className="value-row"><p>Collateral (Liquid funds)</p><h3>0.00</h3></div>
-            <div className="value-row"><p>Collateral (Equity)</p><h3>0.00</h3></div>
-            <div className="value-row"><p>Total collateral</p><h3>0.00</h3></div>
-          </div>
-
-          {/* Commodity Card */}
-          <div className="data-card">
-            <div className="card-head">
-              <span><i className="fa-solid fa-droplet fa-sm px-2"></i> Commodity</span>
-              <div className="links">
-                <a href="#"><i className="fa-solid fa-chart-pie fa-2xs" style={{ color: "#3a5af8" }} /> View statement</a>
-                <a href="#"><i className="fa-solid fa-circle-info fa-2xs" style={{ color: "#5d67f9" }} /> Help</a>
-              </div>
-            </div>
-            <div className="value-row"><p>Available margin</p><h3 className="blue">50,000.00</h3></div>
-            <div className="value-row"><p>Used margin</p><h3 className="blue-2">0.00</h3></div>
-            <div className="value-row"><p>Available cash</p><h3 className="blue-2">50,000.00</h3></div>
-            <hr />
-            <div className="value-row"><p>Opening balance</p><h3>50,000.00</h3></div>
-            <div className="value-row"><p>Payin</p><h3>0.00</h3></div>
-            <div className="value-row"><p>Payout</p><h3>0.00</h3></div>
-            <div className="value-row"><p>SPAN</p><h3>0.00</h3></div>
-            <div className="value-row"><p>Delivery margin</p><h3>0.00</h3></div>
-            <div className="value-row"><p>Exposure</p><h3>0.00</h3></div>
-            <div className="value-row"><p>Options premium</p><h3>0.00</h3></div>
-          </div>
-        </div>
-      </div>
-    </>
+      <p className="funds-footnote">
+        This is a paper account: the money is not real. Deposits and resets are
+        recorded as ledger postings, so your history stays complete — a reset
+        adds a correcting entry rather than erasing what happened.
+      </p>
+    </div>
   );
 };
 

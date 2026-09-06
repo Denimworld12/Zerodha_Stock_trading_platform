@@ -1,0 +1,39 @@
+.signals { padding: 1.25rem 1.5rem; font-size: 0.86rem; }
+
+.signals-header { display: flex; align-items: baseline; justify-content: space-between;
+  flex-wrap: wrap; gap: 0.5rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.6rem; }
+.signals-header h3 { margin: 0; font-size: 1.05rem; font-weight: 600; color: #1f2937; }
+.signals-meta { color: #9ca3af; font-size: 0.75rem; }
+
+.signals-verdict { margin: 0.85rem 0; padding: 0.6rem 0.8rem; border-radius: 6px;
+  background: #fffbeb; border: 1px solid #fde68a; color: #78350f; line-height: 1.45; }
+.signals-verdict code { background: #fef3c7; padding: 0 0.25rem; border-radius: 3px; }
+.signals-verdict .warn { color: #b45309; font-weight: 500; }
+
+.signals-error { margin: 0.85rem 0; padding: 0.6rem 0.8rem; border-radius: 6px;
+  background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+
+.signals-count { margin: 0.75rem 0 0.4rem; color: #6b7280; font-size: 0.78rem; }
+.signals-empty { color: #9ca3af; }
+
+.signals-table { width: 100%; border-collapse: collapse; }
+.signals-table th { text-align: left; font-weight: 500; color: #6b7280; font-size: 0.72rem;
+  text-transform: uppercase; letter-spacing: 0.04em; padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid #e5e7eb; white-space: nowrap; }
+.signals-table td { padding: 0.55rem 0.6rem; border-bottom: 1px solid #f3f4f6;
+  font-variant-numeric: tabular-nums; }
+.signals-table tr.muted td { color: #9ca3af; }
+.signals-table tr.active { background: #f9fafb; }
+.signals-table .sym { font-weight: 600; color: #111827; }
+.signals-table .stop { color: #b91c1c; }
+.signals-table .target { color: #047857; }
+.signals-table .reason { color: #6b7280; font-size: 0.78rem; max-width: 22rem; }
+
+.badge { display: inline-block; padding: 0.1rem 0.45rem; border-radius: 3px;
+  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.03em; }
+.badge.long  { background: #d1fae5; color: #065f46; }
+.badge.short { background: #fee2e2; color: #991b1b; }
+.badge.flat  { background: #f3f4f6; color: #9ca3af; }
+
+.signals-footnote { margin-top: 1rem; color: #9ca3af; font-size: 0.73rem; line-height: 1.5; }
+.signals-footnote code { background: #f3f4f6; padding: 0 0.25rem; border-radius: 3px; }

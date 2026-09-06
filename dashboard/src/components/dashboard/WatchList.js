@@ -1,163 +1,110 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Tooltip } from "@mui/material";
 import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUp from "@mui/icons-material/KeyboardArrowUp";
 import BarChartOutlined from "@mui/icons-material/BarChartOutlined";
-import MoreHoriz from "@mui/icons-material/MoreHoriz";
-import GeneralContext from "./GeneralContext";
-import { DonoutChart } from "../chart/DonoutChart";
-import { useFinnhub } from "../data/FinnhubContext";
 import { Link } from "react-router-dom";
 
-const SYMBOLS = [
-  'OANDA:EUR_USD', 'OANDA:USD_JPY', 'OANDA:GBP_USD', 'OANDA:USD_CHF', 'OANDA:AUD_USD',
-  'BINANCE:BTCUSDT', 'BINANCE:ETHUSDT', 'BINANCE:XRPUSDT', 'BINANCE:BNBUSDT', 'BINANCE:ADAUSDT'
-];
+import GeneralContext from "./GeneralContext";
+import { useMarketData } from "../../lib/marketdata";
+import * as api from "../../lib/api";
 
-const WatchListItem = ({ stock }) => {
-  const [showWatchListEnter, setShowItem] = useState(false);
+/**
+ * Watchlist, driven by the server's price feed.
+ *
+ * The instrument list comes from the server too, so the watchlist can only
+ * contain things that are actually tradable. The old hardcoded list included
+ * five OANDA forex pairs the Finnhub key had no access to; they returned an
+ * error body with HTTP 200 and rendered as a permanent row of ₹0.00.
+ */
+const WatchListItem = ({ symbol, price, prevPrice }) => {
+  const ctx = useContext(GeneralContext);
+  const [hover, setHover] = useState(false);
+
+  // Direction since the previous tick. Honest about what it measures: this is
+  // not a daily change, and labelling it as one would be a lie.
+  const delta = price != null && prevPrice != null ? price - prevPrice : 0;
+  const down = delta < 0;
 
   return (
-    <li onMouseEnter={() => setShowItem(true)} onMouseLeave={() => setShowItem(false)}>
-      <div className="item fs-6" style={{ fontWeight: "bold" }}>
-        <p className={stock.percent < 0 ? "down" : "up"}>{stock.name}</p>
+    <li onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
+      <div className="item">
+        <p className={down ? "down" : "up"}>{symbol}</p>
         <div className="item-Info">
-          <span className="percent">{stock.percent.toFixed(2)}%</span>
-          {stock.percent < 0
-            ? <KeyboardArrowDown className="down" />
-            : <KeyboardArrowUp className="up" />}
-          <span className="price">${stock.price.toFixed(2)}</span>
+          {price == null ? (
+            <span className="price" style={{ color: "#9ca3af" }}>—</span>
+          ) : (
+            <>
+              {delta !== 0 &&
+                (down ? <KeyboardArrowDown className="down" /> : <KeyboardArrowUp className="up" />)}
+              <span className="price">{price.toFixed(2)}</span>
+            </>
+          )}
         </div>
-        <p className="text-muted small">High: ${stock.high?.toFixed(2) || "N/A"}</p>
       </div>
-      {showWatchListEnter && <WatchListAction uid={stock.name} />}
+
+      {hover && (
+        <span className="actions">
+          <Tooltip title="Buy" placement="top">
+            <button className="buy" onClick={() => ctx.openBuyWindow(symbol)}>Buy</button>
+          </Tooltip>
+          <Tooltip title="Sell" placement="top">
+            <button className="sell" onClick={() => ctx.openSellWindow(symbol)}>Sell</button>
+          </Tooltip>
+          <Tooltip title="Chart" placement="top">
+            <Link to="/charts"><button className="action"><BarChartOutlined className="icon" /></button></Link>
+          </Tooltip>
+        </span>
+      )}
     </li>
   );
 };
 
-const WatchListAction = ({ uid }) => {
-  const generalContext = useContext(GeneralContext);
-
-  return (
-    <span className="actions">
-      <Tooltip title="Buy (B)" placement="top">
-        <button className="buy" onClick={() => generalContext.openBuyWindow(uid)}>Buy</button>
-      </Tooltip>
-      <Tooltip title="Sell (S)" placement="top">
-        <button className="sell" onClick={() => generalContext.openSellWindow(uid)}>Sell</button>
-      </Tooltip>
-      <Tooltip title="Analytics (A)" placement="top">
-        <Link to="/charts">
-          <button className="action">
-            <BarChartOutlined className="icon" />
-          </button>
-        </Link>
-      </Tooltip>
-      <Tooltip title="More (M)" placement="top">
-        <button className="action"><MoreHoriz className="icon" /></button>
-      </Tooltip>
-    </span>
-  );
-};
-
 const WatchList = () => {
-  const { prices, subscribe } = useFinnhub();
-  const [stocks, setStocks] = useState([]);
+  const { prices, subscribe, status } = useMarketData();
+  const [symbols, setSymbols] = useState([]);
+  const [prev, setPrev] = useState({});
 
-  // ✅ Fetch quote data from Finnhub API (prevClose + high)
   useEffect(() => {
-    const fetchQuoteData = async () => {
-      const result = await Promise.all(
-        SYMBOLS.map(async (symbol) => {
-          try {
-            const res = await fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=YOUR_FINNHUB_API_KEY`);
-            const data = await res.json();
-            return {
-              name: symbol,
-              price: data.c || 0,
-              prevClose: data.pc || 0,
-              high: data.h || 0,
-              percent: data.pc ? ((data.c - data.pc) / data.pc) * 100 : 0
-            };
-          } catch (error) {
-            console.error("Error fetching quote:", symbol, error);
-            return {
-              name: symbol,
-              price: 0,
-              prevClose: 0,
-              high: 0,
-              percent: 0
-            };
-          }
-        })
-      );
-      setStocks(result);
-    };
-
-    fetchQuoteData();
-  }, []);
-
-  // ✅ Subscribe to live prices
-  useEffect(() => {
-    SYMBOLS.forEach((symbol) => subscribe(symbol));
+    api.instruments()
+      .then((list) => {
+        // Only crypto for now: those are the venues with a live feed wired up.
+        const tradable = list.filter((i) => i.venue === "binance").map((i) => i.symbol);
+        setSymbols(tradable);
+        subscribe(tradable);
+      })
+      .catch(() => setSymbols([]));
   }, [subscribe]);
 
-  // ✅ Update live prices in state
+  // Remember the previous price so the arrow reflects the last move.
   useEffect(() => {
-    setStocks((prev) =>
-      prev.map((s) => {
-        const livePrice = prices[s.name] ?? s.price;
-        const percent = s.prevClose
-          ? ((livePrice - s.prevClose) / s.prevClose) * 100
-          : s.percent;
-
-        return {
-          ...s,
-          price: livePrice,
-          percent
-        };
-      })
-    );
+    setPrev((old) => {
+      const next = { ...old };
+      for (const [sym, t] of Object.entries(prices)) {
+        if (old[sym] !== t.price) next[sym] = old[sym] ?? t.price;
+      }
+      return next;
+    });
   }, [prices]);
 
-  // ✅ Scale price values to max 1000 (for donut)
-  function scaleToMax1000(value) {
-    while (value > 1000) {
-      value /= 10;
-    }
-    return value;
-  }
-
-  const labels = stocks.map((s) => s.name);
-  const data = {
-    labels,
-    datasets: [
-      {
-        label: "Price",
-        data: stocks.map((s) => scaleToMax1000(s.price)),
-        backgroundColor: [
-          'rgba(255,99,132,0.8)', 'rgba(54,162,235,0.8)', 'rgba(255,206,86,0.8)',
-          'rgba(75,192,192,0.8)', 'rgba(153,102,255,0.8)', 'rgba(255,159,64,0.8)',
-          'rgba(199,199,199,0.8)', 'rgba(83,102,255,0.8)', 'rgba(255,102,204,0.8)',
-          'rgba(102,255,204,0.8)'
-        ],
-        borderWidth: 1
-      }
-    ]
-  };
-
   return (
-    <div className="watchlist-container" style={{ width: "440px" }}>
+    <div className="watchlist-container">
       <div className="search-container">
-        <input type="text" placeholder="Search eg: infy, btcusdt" className="search" />
-        <span className="counts">{stocks.length}/10</span>
+        <span className="search" style={{ fontSize: ".8rem", color: "#6b7280" }}>
+          {symbols.length} instruments · {status === "live" ? "live" : status.replace("-", " ")}
+        </span>
       </div>
+
       <ul className="list">
-        {stocks.map((stock, idx) => (
-          <WatchListItem stock={stock} key={idx} />
+        {symbols.map((symbol) => (
+          <WatchListItem
+            key={symbol}
+            symbol={symbol}
+            price={prices[symbol]?.price ?? null}
+            prevPrice={prev[symbol] ?? null}
+          />
         ))}
       </ul>
-      <DonoutChart data={data} />
     </div>
   );
 };

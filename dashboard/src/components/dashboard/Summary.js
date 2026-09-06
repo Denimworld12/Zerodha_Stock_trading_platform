@@ -1,106 +1,134 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { LineChart } from "../chart/LineChart";
+import React, { useCallback, useEffect, useState } from "react";
+import * as api from "../../lib/api";
+import { useAuth } from "../../lib/AuthContext";
+import { useMarketData } from "../../lib/marketdata";
+import "./Tables.css";
+import "./Funds.css";
+
+/**
+ * Account overview.
+ *
+ * `equityMarked` is equity from the ledger PLUS unrealised P&L on open
+ * positions at the current price. Those are two different kinds of number —
+ * one settled and auditable, one an estimate that moves every second — so they
+ * are shown separately rather than merged into a single figure that hides
+ * which part is real.
+ */
+const money = (v) =>
+  Number(v || 0).toLocaleString("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 2 });
 
 const Summary = () => {
-  const [holdings, setHoldings] = useState([]);
-  const [funds, setFunds] = useState(null);
+  const { user } = useAuth();
+  const { status } = useMarketData();
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    // Fetch holdings
-    axios.get("http://localhost:3002/holding").then((res) => {
-      setHoldings(res.data);
-    });
-
-    // Fetch fund data
-    axios.get("http://localhost:3002/funds").then((res) => {
-      setFunds(res.data);
-    });
+  const load = useCallback(async () => {
+    try {
+      setData(await api.summary());
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+    }
   }, []);
 
-  // Compute P&L, Investment, Current Value
-  const investment = holdings.reduce((acc, item) => acc + item.avg * item.qty, 0);
-  const currentValue = holdings.reduce((acc, item) => acc + item.price * item.qty, 0);
-  const pnl = currentValue - investment;
-  const pnlPercentage = investment > 0 ? ((pnl / investment) * 100).toFixed(2) : 0;
+  useEffect(() => {
+    load();
+    // The summary is a server-side mark, so it is polled rather than pushed.
+    // 15s is often enough to feel current without hammering the API; live
+    // per-tick movement is on the Positions screen.
+    const id = setInterval(load, 15000);
+    return () => clearInterval(id);
+  }, [load]);
 
-  // Min/Max for coloring chart
-  const prices = holdings.map(stock => stock.price);
-  const minPrice = Math.min(...prices, 0);
-  const maxPrice = Math.max(...prices, 1);
+  if (error) return <div className="table-error">{error}</div>;
+  if (!data) return <p className="table-loading">Loading…</p>;
 
-  function colorFromRaw(ctx) {
-    if (ctx.type !== 'data') return 'transparent';
-    const value = ctx.raw.v;
-    const percent = (value - minPrice) / (maxPrice - minPrice);
-    const hue = 120 - (120 * percent); // green to red
-    return `hsl(${hue}, 70%, 50%)`;
-  }
-
-  const data = {
-    datasets: [
-      {
-        tree: holdings.map(stock => ({
-          name: stock.name,
-          v: stock.price,
-        })),
-        key: 'v',
-        groups: ['name'],
-        backgroundColor: colorFromRaw,
-        borderRadius: 4,
-        borderWidth: 1,
-        spacing: 1,
-      },
-    ],
-  };
+  const b = data.balances;
+  const unrealised = Number(data.unrealisedPnl || 0);
+  const realised = -Number(b.pnl || 0);   // pnl is a credit bucket; gains are negative
 
   return (
-    <>
-      <div className="username">
-        <h6>Hi, User!</h6>
-        <hr className="divider" />
-      </div>
-
-      <div className="section">
-        <span><p>Equity</p></span>
-
-        <div className="data">
-          <div className="first">
-            <h3>{funds ? `₹${(funds.availableCash / 1000).toFixed(2)}k` : '—'}</h3>
-            <p>Margin available</p>
-          </div>
-          <hr />
-
-          <div className="second">
-            <p>Margins used <span>{funds ? `₹${(funds.usedMargin / 1000).toFixed(2)}k` : '—'}</span></p>
-            <p>Opening balance <span>{funds ? `₹${(funds.openingBalance / 1000).toFixed(2)}k` : '—'}</span></p>
-          </div>
+    <div className="funds-page">
+      <div className="funds-header">
+        <div>
+          <h3>Hi, {user?.name || user?.email?.split("@")[0] || "there"}</h3>
+          <p className="funds-sub">
+            Paper account · prices {status === "live" ? "live" : status.replace("-", " ")}
+          </p>
         </div>
-        <hr className="divider" />
-      </div>
-
-      <div className="section">
-        <span><p>Holdings ({holdings.length})</p></span>
-
-        <div className="data">
-          <div className="first">
-            <h3 className={pnl >= 0 ? "profit" : "loss"}>
-              ₹{(pnl / 1000).toFixed(2)}k <small>{pnl >= 0 ? "+" : "-"}{Math.abs(pnlPercentage)}%</small>
-            </h3>
-            <p>P&L</p>
-          </div>
-          <hr />
-
-          <div className="second">
-            <p>Current Value <span>₹{(currentValue / 1000).toFixed(2)}k</span></p>
-            <p>Investment <span>₹{(investment / 1000).toFixed(2)}k</span></p>
-          </div>
+        <div className="funds-equity">
+          <span className="label">Equity (marked)</span>
+          <span className="value">{money(data.equityMarked)}</span>
         </div>
-
-        <LineChart data={data} />
-        <hr className="divider" />
       </div>
-    </>
+
+      <div className="funds-grid">
+        <div className="funds-tile">
+          <span className="tile-label">Available cash</span>
+          <span className="tile-value">{money(b.cash)}</span>
+          <span className="tile-hint">Free to trade</span>
+        </div>
+        <div className="funds-tile">
+          <span className="tile-label">Used margin</span>
+          <span className="tile-value">{money(b.margin)}</span>
+          <span className="tile-hint">{data.positions.length} open position(s)</span>
+        </div>
+        <div className="funds-tile">
+          <span className="tile-label">Unrealised P&amp;L</span>
+          <span className={`tile-value ${unrealised >= 0 ? "gain" : "loss"}`}>{money(unrealised)}</span>
+          <span className="tile-hint">Moves with the market</span>
+        </div>
+        <div className="funds-tile">
+          <span className="tile-label">Realised P&amp;L</span>
+          <span className={`tile-value ${realised >= 0 ? "gain" : "loss"}`}>{money(realised)}</span>
+          <span className="tile-hint">Booked, from the ledger</span>
+        </div>
+      </div>
+
+      {data.positions.length > 0 && (
+        <>
+          <div className="table-head" style={{ marginTop: "1.75rem" }}>
+            <h3>Open positions</h3>
+          </div>
+          <div className="table-scroll">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Instrument</th><th>Side</th>
+                  <th className="num">Qty</th><th className="num">Avg</th>
+                  <th className="num">Last</th><th className="num">Unrealised</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.positions.map((p) => (
+                  <tr key={p.symbol}>
+                    <td className="sym">{p.symbol}</td>
+                    <td><span className={`pill ${p.side}`}>{p.side}</span></td>
+                    <td className="num">{p.quantity}</td>
+                    <td className="num">{Number(p.averagePrice).toFixed(2)}</td>
+                    <td className="num">
+                      {p.lastPrice == null
+                        ? <span className="dim">no price</span>
+                        : Number(p.lastPrice).toFixed(2)}
+                    </td>
+                    <td className={`num ${Number(p.unrealisedPnl) >= 0 ? "gain" : "loss"}`}>
+                      {p.stale ? <span className="dim">stale</span> : money(p.unrealisedPnl)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+
+      <p className="funds-footnote">
+        Equity (marked) is settled equity from the ledger plus unrealised P&amp;L
+        at the latest price. The settled part is auditable; the unrealised part
+        is an estimate that changes with every tick.
+      </p>
+    </div>
   );
 };
 
