@@ -4,6 +4,7 @@ import { Route, Routes } from "react-router-dom";
 import Apps from "./Apps";
 import Funds from "./Funds";
 import Holdings from "./Holdings";
+import Journal from "./Journal";
 import Orders from "./Orders";
 import Positions from "./Positions";
 import Signals from "./Signals";
@@ -27,6 +28,7 @@ const HomeDashboard = () => (
           <Route path="/funds" element={<Funds />} />
           <Route path="/charts" element={<Apps />} />
           <Route path="/signals" element={<Signals />} />
+          <Route path="/journal" element={<Journal />} />
         </Routes>
       </div>
     </GeneralContextProvider>

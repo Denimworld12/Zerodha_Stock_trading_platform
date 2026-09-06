@@ -228,6 +228,78 @@ router.get("/positions", readLimiter, resolveAccount, asyncRoute(async (req, res
 }));
 
 // ---------------------------------------------------------------------------
+// journal and analytics — the part that is useful with or without an edge
+// ---------------------------------------------------------------------------
+router.get("/journal/trades", readLimiter, resolveAccount, asyncRoute(async (req, res) => {
+  const journal = require("../lib/journal");
+  res.json(await journal.trades(req.account._id, {
+    limit: Math.min(Number(req.query.limit) || 200, 500),
+    symbol: req.query.symbol,
+  }));
+}));
+
+router.get("/journal/performance", readLimiter, resolveAccount, asyncRoute(async (req, res) => {
+  const journal = require("../lib/journal");
+  const days = req.query.days ? Number(req.query.days) : null;
+  res.json(await journal.performance(req.account._id, req.account.baseCurrency, { days }));
+}));
+
+router.get("/journal/breakdown", readLimiter, resolveAccount, asyncRoute(async (req, res) => {
+  const journal = require("../lib/journal");
+  res.json(await journal.breakdown(req.account._id));
+}));
+
+// ---------------------------------------------------------------------------
+// autonomous runner
+//
+// Gated behind the same three locks as live execution, and additionally
+// refuses any account that is not paper. Nothing in the tournament cleared its
+// gate, so this should stay in dry-run until something does.
+// ---------------------------------------------------------------------------
+router.get("/runner", readLimiter, asyncRoute(async (_req, res) => {
+  const { getRunner } = require("../lib/runner");
+  const r = getRunner();
+  res.json(r ? r.status() : { running: false, configured: false });
+}));
+
+router.post("/runner", writeLimiter, resolveAccount, asyncRoute(async (req, res) => {
+  if (!process.env.QSMC_EXECUTION_ENABLED || process.env.QSMC_EXECUTION_ENABLED !== "true") {
+    return res.status(403).json({
+      error: "set QSMC_EXECUTION_ENABLED=true to arm the runner",
+      code: "EXECUTION_DISABLED",
+    });
+  }
+  const { getRunner, clearRunner } = require("../lib/runner");
+  const schema = z.object({
+    action: z.enum(["start", "stop"]),
+    symbols: z.array(z.string()).optional(),
+    interval: z.string().optional(),
+    minConfidence: z.number().min(0).max(1).optional(),
+    // Defaults to a dry run: arming a live loop must be a deliberate act.
+    dryRun: z.boolean().default(true),
+    accountId: z.string().optional(),
+  });
+  const parsed = schema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: "invalid request", code: "VALIDATION" });
+
+  if (parsed.data.action === "stop") {
+    clearRunner();
+    return res.json({ running: false, stopped: true });
+  }
+
+  clearRunner();
+  const r = getRunner({
+    accountId: req.account._id,
+    userId: req.user._id,
+    symbols: parsed.data.symbols || ["BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT"],
+    interval: parsed.data.interval || "15m",
+    minConfidence: parsed.data.minConfidence ?? 0.58,
+    dryRun: parsed.data.dryRun,
+  }).start();
+  res.json(r.status());
+}));
+
+// ---------------------------------------------------------------------------
 // market data
 // ---------------------------------------------------------------------------
 router.get("/instruments", readLimiter, asyncRoute(async (req, res) => {

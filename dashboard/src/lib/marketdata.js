@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { API_URL } from "../config";
+import { getToken } from "./api";
 
 /**
  * Live prices from OUR server.
@@ -66,6 +67,11 @@ export const MarketDataProvider = ({ children, symbols = [] }) => {
       ws.onopen = () => {
         attemptRef.current = 0;
         setStatus("live");
+        // A browser cannot set an Authorization header on a WebSocket
+        // handshake, so the token is sent as the first message. Prices work
+        // without it; only account streams require it.
+        const token = getToken();
+        if (token) ws.send(JSON.stringify({ type: "auth", token }));
         const list = [...wantedRef.current];
         if (list.length) ws.send(JSON.stringify({ type: "subscribe", symbols: list }));
       };

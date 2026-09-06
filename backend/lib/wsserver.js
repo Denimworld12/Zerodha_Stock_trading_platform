@@ -21,7 +21,8 @@
 
 const { WebSocketServer } = require("ws");
 const prices = require("./prices");
-const { Order2, Position2 } = require("../models");
+const { Order2, Position2, Account } = require("../models");
+const { resolveToken } = require("./auth");
 
 const HEARTBEAT_MS = 30_000;
 
@@ -85,11 +86,27 @@ function attach(server, { path = "/ws" } = {}) {
   positionStream = watchCollection(Position2, "position");
 
   // -- client lifecycle --------------------------------------------------
+  /** Verify a token sent over the socket and attach the user to its state. */
+  async function authenticate(ws, state, token) {
+    if (process.env.AUTH_DEV_BYPASS === "true" && process.env.NODE_ENV !== "production") {
+      const { User } = require("../models");
+      state.user = await User.findOne({ email: "dev@localhost" });
+      return send(ws, "authenticated", { user: state.user?.email, devBypass: true });
+    }
+    if (!token) throw new Error("no token");
+    const { user } = await resolveToken(String(token));
+    if (!user || user.status !== "active") throw new Error("inactive account");
+    state.user = user;
+    send(ws, "authenticated", { user: user.email });
+  }
+
   wss.on("connection", (ws, req) => {
-    const state = { symbols: new Set(), accountId: null, alive: true };
+    const state = { symbols: new Set(), accountId: null, user: null, alive: true };
     clients.set(ws, state);
 
     send(ws, "hello", {
+      // Prices are public; account streams need an { type: "auth" } message.
+      authRequired: true,
       // The snapshot means a fresh tab renders immediately instead of waiting
       // for the next tick, which for a quiet symbol could be seconds away.
       prices: feed.snapshot(),
@@ -125,17 +142,36 @@ function attach(server, { path = "/ws" } = {}) {
           send(ws, "subscribed", { symbols: [...state.symbols] });
           break;
         }
+        case "auth": {
+          // A browser cannot set an Authorization header on a WebSocket
+          // handshake, and putting the token in the query string writes it into
+          // every access log and proxy trace. So the token arrives as the first
+          // message instead, over the already-established connection.
+          authenticate(ws, state, msg.token).catch(() => {
+            send(ws, "error", { message: "authentication failed", code: "INVALID_TOKEN" });
+          });
+          break;
+        }
         case "watch_account": {
-          // TODO(auth): the token must be verified before this is trusted.
-          // Until then order/position pushes are only enabled when the dev
-          // bypass is on, so an unauthenticated socket cannot subscribe to
-          // someone else's account.
-          if (process.env.AUTH_DEV_BYPASS === "true" && process.env.NODE_ENV !== "production") {
-            state.accountId = String(msg.accountId || "");
-            send(ws, "watching", { accountId: state.accountId });
-          } else {
-            send(ws, "error", { message: "account streams require authentication" });
+          if (!state.user) {
+            send(ws, "error", {
+              message: "send an { type: 'auth', token } message first",
+              code: "NOT_AUTHENTICATED",
+            });
+            break;
           }
+          // Ownership is re-checked HERE, not taken from the client. Otherwise
+          // any authenticated user could name someone else's accountId and
+          // receive their fills.
+          Account.findOne({ _id: String(msg.accountId || ""), userId: state.user._id })
+            .then((account) => {
+              if (!account) {
+                return send(ws, "error", { message: "account not found", code: "NOT_FOUND" });
+              }
+              state.accountId = String(account._id);
+              send(ws, "watching", { accountId: state.accountId });
+            })
+            .catch(() => send(ws, "error", { message: "invalid account id" }));
           break;
         }
         case "ping":

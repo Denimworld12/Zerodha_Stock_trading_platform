@@ -10,6 +10,7 @@ const ITEMS = [
   ["Charts", "/charts"],
   ["Funds", "/funds"],
   ["Signals", "/signals"],
+  ["Journal", "/journal"],
 ];
 
 const Menu = () => {
