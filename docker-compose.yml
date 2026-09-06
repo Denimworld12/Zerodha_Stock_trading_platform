@@ -1,0 +1,41 @@
+# Local development dependencies.
+#
+#   docker compose up -d      start
+#   docker compose down       stop (data survives in the volume)
+#   docker compose down -v    stop and wipe
+services:
+  mongo:
+    image: mongo:7
+    container_name: tradingmitra-mongo
+    restart: unless-stopped
+    # Single-node REPLICA SET, not standalone.
+    #
+    # MongoDB refuses multi-document transactions on a standalone server, and
+    # placing an order touches three collections (order + position + ledger).
+    # Without transactions a crash between those writes leaves the books
+    # permanently wrong, and no amount of application code can fix it after the
+    # fact. A one-member replica set costs nothing, behaves like production
+    # (Atlas is always a replica set), and turns transactions on.
+    command: ["--replSet", "rs0", "--bind_ip_all"]
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      # Doubles as the initiator: rs.status() throws until the set exists, so
+      # the catch branch bootstraps it exactly once. The member host must be
+      # localhost:27017 so the same connection string works from the host and
+      # from inside the container.
+      test: >
+        mongosh --quiet --eval "
+          try { rs.status().ok }
+          catch (e) {
+            rs.initiate({_id:'rs0', members:[{_id:0, host:'localhost:27017'}]}).ok
+          }"
+      interval: 5s
+      timeout: 10s
+      retries: 20
+      start_period: 15s
+
+volumes:
+  mongo-data:
