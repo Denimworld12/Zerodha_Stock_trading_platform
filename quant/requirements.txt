@@ -11,7 +11,9 @@ python-dotenv>=1.0
 pydantic>=2.6
 matplotlib>=3.8
 
-# Optional, install per-venue:
-#   MetaTrader5>=5.0.45   ; Windows only - live/paper MT5 execution
-#   yfinance>=0.2         ; equity/FX daily bars fallback
-httpx2>=0.2   ; dev only, required by fastapi TestClient
+# Dev only — fastapi's TestClient imports it.
+httpx2>=0.2
+
+# Install per-venue, not required for the research engine:
+#   MetaTrader5>=5.0.45   Windows only; live/paper MT5 execution
+#   yfinance>=0.2         alternative equity/FX loader

@@ -115,7 +115,20 @@ fi
 # ------------------------------------------------------------ database -------
 echo
 echo "database"
-docker compose up -d > /tmp/compose.log 2>&1 || { err "docker compose up failed — see /tmp/compose.log"; FAIL=1; }
+# An already-running container is success, not failure. `container_name` is
+# fixed, so a second checkout of this repo on the same machine collides with the
+# first — report that clearly instead of as a generic compose error.
+if docker ps --filter "name=tradingmitra-mongo" --filter "status=running" --format '{{.Names}}' \
+     | grep -q tradingmitra-mongo; then
+  ok "mongo container already running (reusing it)"
+elif docker compose up -d > /tmp/compose.log 2>&1; then
+  ok "mongo container started"
+elif grep -q "already in use" /tmp/compose.log 2>/dev/null; then
+  warn "a tradingmitra-mongo container exists from another checkout of this repo"
+  dim "reusing it; 'docker rm -f tradingmitra-mongo' if you want a clean one"
+else
+  err "docker compose up failed — see /tmp/compose.log"; FAIL=1
+fi
 printf "    waiting for the replica set… "
 for i in $(seq 1 60); do
   [ "$(docker inspect --format='{{.State.Health.Status}}' tradingmitra-mongo 2>/dev/null)" = "healthy" ] && break
