@@ -50,6 +50,10 @@ UNIVERSES = {
     "fx": (["EURUSD", "GBPUSD", "USDJPY", "AUDUSD"], "1h"),
 }
 
+# Sensible history per timeframe. Longer bars need more calendar time to yield
+# a usable number of events, and Yahoo caps intraday history far below daily.
+DEFAULT_PERIOD = {"15m": "60d", "1h": "730d", "4h": "730d", "1d": "10y"}
+
 # The bar every candidate must clear to be worth paper trading.
 GATE = {"auc": 0.55, "expectancy_R": 0.0, "dsr": 0.95, "min_trades": 100}
 
@@ -167,7 +171,10 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--source", choices=["binance", "fx"], default="fx")
     ap.add_argument("--strategies", nargs="*", default=None)
-    ap.add_argument("--period", default="730d")
+    ap.add_argument("--interval", default=None,
+                    help="override the universe default (15m, 1h, 4h, 1d)")
+    ap.add_argument("--period", default=None,
+                    help="Yahoo range; defaults per interval")
     ap.add_argument("--bars", type=int, default=20000)
     ap.add_argument("--equity", type=float, default=10_000.0)
     ap.add_argument("--n-trials", type=int, default=None,
@@ -175,6 +182,9 @@ def main() -> int:
     args = ap.parse_args()
 
     symbols, interval = UNIVERSES[args.source]
+    if args.interval:
+        interval = args.interval
+    period = args.period or DEFAULT_PERIOD.get(interval, "730d")
     registry = available()
     names = args.strategies or sorted(registry)
     names = [n for n in names if n in registry]
@@ -185,11 +195,11 @@ def main() -> int:
     # Count every combination actually explored, not just this run's strategies.
     n_trials = args.n_trials or (len(names) * len(UNIVERSES))
 
-    print(f"\nuniverse: {args.source} · {', '.join(symbols)} · {interval}")
+    print(f"\nuniverse: {args.source} · {', '.join(symbols)} · {interval} · {period}")
     print(f"strategies: {len(names)} · deflating Sharpe for {n_trials} trials\n")
 
     print("loading data…")
-    universe = load_universe(args.source, symbols, interval, args.period, args.bars)
+    universe = load_universe(args.source, symbols, interval, period, args.bars)
     feats = {}
     for sym in symbols:
         m = mirror_of(sym)
@@ -213,6 +223,11 @@ def main() -> int:
 
         if "error" in res:
             print(f"  {name:16s} {res['error']}")
+        elif res.get("oof_auc") is None:
+            # Too few events for any purged fold to be valid. Reporting the
+            # trade count is more useful than a blank line, because "we could
+            # not test this" is a different answer from "this failed".
+            print(f"  {name:16s} untestable — {res['events']} events, no valid CV fold")
         else:
             mark = "PASS" if res["passes_gate"] else "    "
             print(f"  {name:16s} AUC {res['oof_auc']:.3f}  "
@@ -220,7 +235,8 @@ def main() -> int:
                   f"DSR {res['deflated_sharpe_p']:.3f}  {mark}")
 
     # ---- leaderboard ----
-    scored = [r for r in results if "error" not in r]
+    scored = [r for r in results if "error" not in r and r.get("oof_auc") is not None]
+    untestable = [r for r in results if "error" not in r and r.get("oof_auc") is None]
     scored.sort(key=lambda r: (r["passes_gate"], r["expectancy_R"]), reverse=True)
 
     print("\n" + "=" * 82)
@@ -234,6 +250,10 @@ def main() -> int:
               f"{'PASS' if r['passes_gate'] else 'fail'}")
     print("=" * 82)
 
+    if untestable:
+        print(f"\n{len(untestable)} strategy(ies) produced too few events to cross-validate "
+              f"at this timeframe: {', '.join(r['strategy'] for r in untestable)}")
+
     winners = [r for r in scored if r["passes_gate"]]
     print(f"\ngate: AUC>={GATE['auc']}  expR>{GATE['expectancy_R']}  "
           f"DSR>={GATE['dsr']}  trades>={GATE['min_trades']}")
@@ -246,9 +266,9 @@ def main() -> int:
         print("no capital should be risked on any of these, and it cost a few minutes")
         print("to establish rather than a few months of losses.")
 
-    out = ARTIFACT_DIR / f"tournament_{args.source}.json"
+    out = ARTIFACT_DIR / f"tournament_{args.source}_{interval}.json"
     out.write_text(json.dumps({
-        "source": args.source, "symbols": symbols, "interval": interval,
+        "source": args.source, "symbols": symbols, "interval": interval, "period": period,
         "n_trials": n_trials, "gate": GATE, "results": results,
     }, indent=2, default=str))
     print(f"\nreport -> {out}")

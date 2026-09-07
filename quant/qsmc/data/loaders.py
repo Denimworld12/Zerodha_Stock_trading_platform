@@ -340,7 +340,19 @@ def load_fx(
     period: str = "730d",
     refresh: bool = False,
 ) -> pd.DataFrame:
-    """Cached Yahoo FX loader, mirroring :func:`load_cached`."""
+    """Cached Yahoo FX loader, mirroring :func:`load_cached`.
+
+    Yahoo has no native 4h bar, so 4h is built by resampling 1h. That caps 4h
+    history at Yahoo's 1h limit of ~730 days; daily goes back a decade and is
+    fetched directly.
+
+    Note `period="max"` is a trap for daily bars — Yahoo switches to monthly
+    aggregation and returns ~274 rows instead of thousands. Use "10y".
+    """
+    if interval == "4h":
+        hourly = load_fx(symbol, "1h", period, refresh)
+        return resample(hourly, "4h")
+
     path = CACHE_DIR / f"yahoo_{symbol.upper()}_{interval}_{period}.parquet"
     csv_path = path.with_suffix(".csv.gz")
 

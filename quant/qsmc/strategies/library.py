@@ -25,7 +25,10 @@ class SmcMirror(Strategy):
     thesis = ("Price returns to an institutional order block in the discounted "
               "half of its range after taking liquidity, in the direction of a "
               "structure break.")
-    timeframes = ("15m", "1h", "4h")
+    # Daily added deliberately: practitioners trade structural concepts on
+    # higher timeframes, and 15m is closer to microstructure noise. Excluding
+    # daily would leave the most plausible case for SMC untested.
+    timeframes = ("15m", "1h", "4h", "1d")
     defaults = {}
 
     def generate(self, ctx: StrategyContext) -> pd.Series:
@@ -64,7 +67,7 @@ class MeanReversion(Strategy):
     thesis = ("A move far enough from its own recent mean, without a trend to "
               "justify it, reverts. The natural opposite of momentum, included "
               "so the two can be compared on the same sample.")
-    timeframes = ("15m", "1h", "4h")
+    timeframes = ("15m", "1h", "4h", "1d")
     defaults = {"window": 48, "entry_z": 2.0, "trend_window": 240, "debounce": 8}
 
     def generate(self, ctx: StrategyContext) -> pd.Series:
@@ -93,7 +96,7 @@ class MirrorPairsSpread(Strategy):
               "right when their beta-hedged spread dislocates; the cheap leg "
               "converges. This is the Mirror-Market idea stated as statistical "
               "arbitrage rather than as chart geometry.")
-    timeframes = ("15m", "1h", "4h")
+    timeframes = ("15m", "1h", "4h", "1d")
     defaults = {"entry_z": 2.0, "exit_z": 0.5, "min_abs_corr": 0.5, "debounce": 6}
 
     def generate(self, ctx: StrategyContext) -> pd.Series:
